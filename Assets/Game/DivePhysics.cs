@@ -13,7 +13,7 @@ public class DivePhysics {
     private const int maxCollisions = 128;
 
     ///// Methods /////
-    public static void ResolveCollisions (Collider collider, ref Vector3 origin, ref Vector3 velocity, int layerMask, ref Vector3 squash) {
+    public static void ResolveCollisions (Collider collider, ref Vector3 origin, ref Vector3 velocity, int layerMask) {
         
         // manual collision resolving
         int numOverlaps = 0;
@@ -62,7 +62,6 @@ public class DivePhysics {
                 direction.Normalize();
 
                 velocity += Vector3.Dot(velocity, -direction) * direction;
-                squash += Vector3.Dot(velocity, -direction) * direction;
 
                 float isSide = Mathf.Abs(Vector3.Dot(direction, Vector3.up));
 

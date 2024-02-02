@@ -1,85 +1,80 @@
 using UnityEngine;
+using Game.Controllers;
 
-public class PlayerStateGrounded : PlayerBaseState
+namespace Game.StateMachine 
+
 {
-    public PlayerStateGrounded(PlayerCharacter currentContext, PlayerStateFactory playerStateFactory) : base(currentContext, playerStateFactory)
+    public class PlayerStateGrounded : PlayerState
     {
-        _isRootState = true;
-        name = "grounded";
-    }
+        public PlayerStateGrounded(SkateCharacterController currentContext, PlayerStateFactory playerStateFactory) : base(currentContext, playerStateFactory)
+        {
+            _isRootState = true;
+            name = "grounded";
+        }
 
-    public override void EnterState()
-    {
-        // Debug.Log("ENTER GROUNDED");
-        // Debug.Log(ctx.moveData.velocity);
+        public override void EnterState()
+        {
+            // Debug.Log("ENTER GROUNDED");
+            // Debug.Log(ctx.moveData.velocity);
 
-        InitializeSubStates();
-    }
+            InitializeSubStates();
+        }
 
-    public override void UpdateState()
-    {
+        public override void UpdateState()
+        {
 
-        // Debug.Log(ctx.moveData.velocity.magnitude);
+            // if (ctx.playerData.wishJumpUp && ctx.energySlider.value > .25f) {
 
-        if (ctx.playerData.wishJumpUp && ctx.energySlider.value > .25f) {
-            // ctx.framingCam.m_CameraDistance = Mathf.Lerp(ctx.framingCam.m_CameraDistance, 3f, Time.deltaTime * 4f);
-            // ctx.sphereLines.SetFloat("Speed", -ctx.playerData.vCharge);
-            // ctx.sphereLines.Play();
+            //     Jump();
+
+            // }
+
+            if (ctx.characterData.playerData.wishJumpPress && ctx.timerController.jumpTimer <= 0f) {
+                ctx.timerController.jumpTimer = .5f;
+                Jump();
+            }
+
+            ctx.collisionHandler.CollisionCheck();
+
             
-            // SubtractVelocityAgainst(ref ctx.moveData.velocity, -ctx.moveData.velocity.normalized, ctx.moveData.velocity.magnitude * 2f);
 
-            // BrakeCharge(ctx.avatarLookForward);
 
-            Jump();
+            CheckSwitchStates();
+        }
+
+        public override void ExitState()
+        {
+            // ctx.smokeLand.SetVector3("direction", Vector3.ProjectOnPlane(ctx.moveData.velocity, ctx.groundNormal));
+            // ctx.smokeLand.SetVector3("position", ctx.moveData.origin);
+            // Debug.Log("EXIT GROUNDED");
+            // Debug.Log(ctx.moveData.velocity);
+
+            
+        }
+
+        public override void InitializeSubStates()
+        {
+            // if (ctx.playerData.attacking) {
+            //     SetSubState(factory.Lunge());
+            // } else if (ctx.playerData.wishShiftDown) {
+            //     // SetSubState(factory.Dash());
+            // } else {
+                SetSubState(factory.Neutral());
+            // }
+
+            
 
         }
 
-        // if (ctx.playerData.wishJumpUp && !ctx.playerData.grappling) {
-        //     BoostJump(ctx.avatarLookForward, Mathf.Max(ctx.moveData.velocity.magnitude, 30f));
-        // }
+        public override void CheckSwitchStates()
+        {
 
-        ctx.CollisionCheck();
-
-
-        CheckSwitchStates();
-    }
-
-    public override void ExitState()
-    {
-        // ctx.smokeLand.SetVector3("direction", Vector3.ProjectOnPlane(ctx.moveData.velocity, ctx.groundNormal));
-        // ctx.smokeLand.SetVector3("position", ctx.moveData.origin);
-        // Debug.Log("EXIT GROUNDED");
-        // Debug.Log(ctx.moveData.velocity);
-
-        
-    }
-
-    public override void InitializeSubStates()
-    {
-        // if (ctx.playerData.attacking) {
-        //     SetSubState(factory.Lunge());
-        // } else if (ctx.playerData.wishShiftDown) {
-        //     // SetSubState(factory.Dash());
-        // } else {
-            SetSubState(factory.Neutral());
-        // }
-
-        
-
-    }
-
-    public override void CheckSwitchStates()
-    {
-        // if (ctx.playerData.wishCrouch) {
-        //     SwitchState(factory.Charge());
-        // } else 
-
-        if (!ctx.playerData.grounded) {
-            SwitchState(factory.Air());
+            if (ctx.characterData.playerData.grappling) {
+                SwitchState(factory.Grapple());
+            } else if (!ctx.characterData.playerData.grounded) {
+                SwitchState(factory.Air());
+            }
         }
-        else if (ctx.playerData.grappling) {
-            SwitchState(factory.Grapple());
-        }
-    }
 
+    }
 }

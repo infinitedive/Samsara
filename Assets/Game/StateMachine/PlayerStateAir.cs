@@ -1,8 +1,12 @@
 using UnityEngine;
+using Game.Controllers;
 
-public class PlayerStateAir : PlayerBaseState {
+namespace Game.StateMachine 
 
-    public PlayerStateAir(PlayerCharacter currentContext, PlayerStateFactory playerStateFactory) : base (currentContext, playerStateFactory) {
+{
+    public class PlayerStateAir : PlayerState {
+
+    public PlayerStateAir(SkateCharacterController currentContext, PlayerStateFactory playerStateFactory) : base (currentContext, playerStateFactory) {
         _isRootState = true;
         name = "air";
     }
@@ -19,25 +23,19 @@ public class PlayerStateAir : PlayerBaseState {
     public override void UpdateState()
     {
 
-        if (ctx.ignoreGravityTimer > 0f || ctx.playerData.hovering || ctx.jumpTimer > 0f) { } 
-        else if (ctx.reduceGravityTimer > 0f) {
-            ctx.moveData.velocity.y -= (ctx.moveConfig.gravity * Time.deltaTime * (1f - ctx.reduceGravityTimer));
-        } else if (!ctx.playerData.grappling) {
-            ctx.moveData.velocity.y -= (ctx.moveConfig.gravity * Time.deltaTime);
+        if (ctx.timerController.ignoreGravityTimer > 0f || ctx.characterData.playerData.hovering || ctx.timerController.jumpTimer > 0f) { } 
+        else if (ctx.timerController.reduceGravityTimer > 0f) {
+            ctx.characterData.moveData.velocity.y -= (ctx.characterData.moveConfig.gravity * Time.deltaTime * (1f - ctx.timerController.reduceGravityTimer));
+        } else if (!ctx.characterData.playerData.grappling) {
+            ctx.characterData.moveData.velocity.y -= (ctx.characterData.moveConfig.gravity * Time.deltaTime);
             // Debug.Log(ctx.moveConfig.gravity * Time.deltaTime);
         }
 
 
-        AirMovement();
+        // AirMovement();
+        OnlyAngularVelocity(ctx.characterData.playerData.wishMove, 1f);
 
-        // if (ctx.moveData.velocity.magnitude > ctx.moveConfig.runSpeed) {
-        //     SubtractVelocityAgainst(ctx.moveData.velocity, ctx.moveData.velocity.magnitude / 2f);
-        // }
-
-        // Debug.Log(ctx.moveData.velocity.magnitude);
-        // ctx.moveData.velocity = Vector3.ClampMagnitude(ctx.moveData.velocity, 30f);
-        ctx.CollisionCheck();
-        // Debug.Log(ctx.playerData.grounded);
+        ctx.collisionHandler.CollisionCheck();
         CheckSwitchStates();
     }
 
@@ -55,15 +53,11 @@ public class PlayerStateAir : PlayerBaseState {
     public override void CheckSwitchStates()
     {
 
-        // if (ctx.playerData.wishCrouch) {
-        //     SwitchState(factory.Charge());
-        // } else 
-        if (ctx.playerData.grounded) {
+        if (ctx.characterData.playerData.grounded) {
             SwitchState(factory.Grounded());
-        } 
-        else if (ctx.playerData.grappling) {
+        } else if (ctx.characterData.playerData.grappling) {
             SwitchState(factory.Grapple());
-        } 
+        }
 
     }
 
@@ -71,81 +65,81 @@ public class PlayerStateAir : PlayerBaseState {
 
     private void AirMovement() {
             
-        if (ctx.playerData.detectWall && !ctx.playerData.grappling) { // wall run state
+        if (ctx.characterData.playerData.detectWall && !ctx.characterData.playerData.grappling) { // wall run state
 
             if (ctx.doubleJump) {
-                ctx.airHike.SetVector3("origin", ctx.moveData.origin);
-                ctx.airHike.SetVector3("lookAt", ctx.playerData.wallNormal / 2f);
-                ctx.airHike.SetFloat("size", 4f);
-                ctx.airHike.Play();
+                ctx.vfxController.airHike.SetVector3("origin", ctx.characterData.moveData.origin);
+                ctx.vfxController.airHike.SetVector3("lookAt", ctx.characterData.playerData.wallNormal / 2f);
+                ctx.vfxController.airHike.SetFloat("size", 4f);
+                ctx.vfxController.airHike.Play();
             }
 
             ctx.doubleJump = false;
 
-            if (Vector3.Dot(ctx.moveData.velocity, ctx.playerData.wallNormal) <= -7.5f) {
+            if (Vector3.Dot(ctx.characterData.moveData.velocity, ctx.characterData.playerData.wallNormal) <= -7.5f) {
                 
-                ctx.smokeLand.SetVector3("velocity", Vector3.ProjectOnPlane(ctx.moveData.velocity / 2f, ctx.playerData.wallNormal));
-                ctx.smokeLand.SetVector3("position", ctx.moveData.origin - ctx.playerData.wallNormal / 2f);
-                ctx.smokeLand.SetVector3("eulerAngles", Quaternion.LookRotation(ctx.playerData.wallNormal, Vector3.ProjectOnPlane(-ctx.velocityForward, ctx.playerData.wallNormal)).eulerAngles);
-                ctx.smokeLand.Play();
+                ctx.vfxController.smokeLand.SetVector3("velocity", Vector3.ProjectOnPlane(ctx.characterData.moveData.velocity / 2f, ctx.characterData.playerData.wallNormal));
+                ctx.vfxController.smokeLand.SetVector3("position", ctx.characterData.moveData.origin - ctx.characterData.playerData.wallNormal / 2f);
+                ctx.vfxController.smokeLand.SetVector3("eulerAngles", Quaternion.LookRotation(ctx.characterData.playerData.wallNormal, Vector3.ProjectOnPlane(-ctx.characterData.velocityForward, ctx.characterData.playerData.wallNormal)).eulerAngles);
+                ctx.vfxController.smokeLand.Play();
             }
             
-            // ctx.moveData.velocity.y = Mathf.Lerp(ctx.moveData.velocity.y, 0f, Time.deltaTime / 4f);
+            // ctx.characterData.moveData.velocity.y = Mathf.Lerp(ctx.characterData.moveData.velocity.y, 0f, Time.deltaTime / 4f);
 
-            // if (ctx.moveData.velocity.magnitude > ctx.moveConfig.runSpeed + 10f) {
-            //     SubtractVelocityAgainst(Vector3.ProjectOnPlane(ctx.moveData.velocity.normalized, ctx.playerData.wallNormal), ctx.moveData.velocity.magnitude / 2f);
+            // if (ctx.characterData.moveData.velocity.magnitude > ctx.moveConfig.runSpeed + 10f) {
+            //     SubtractVelocityAgainst(Vector3.ProjectOnPlane(ctx.characterData.moveData.velocity.normalized, ctx.characterData.playerData.wallNormal), ctx.characterData.moveData.velocity.magnitude / 2f);
             // } 
             // else 
-            // if (ctx.moveData.velocity.magnitude < ctx.moveConfig.walkSpeed && ctx.playerData.wishShiftDown) {
-            //     AddVelocityTo(Vector3.ProjectOnPlane(ctx.moveData.velocity.normalized, ctx.playerData.wallNormal), ctx.moveConfig.walkSpeed + 5f);
+            // if (ctx.characterData.moveData.velocity.magnitude < ctx.moveConfig.walkSpeed && ctx.characterData.playerData.wishShiftDown) {
+            //     AddVelocityTo(Vector3.ProjectOnPlane(ctx.characterData.moveData.velocity.normalized, ctx.characterData.playerData.wallNormal), ctx.moveConfig.walkSpeed + 5f);
             // }
 
 
-            // if (ctx.jumpTimer <= 0f) ctx.moveData.velocity += -ctx.playerData.wallNormal;
+            // if (ctx.jumpTimer <= 0f) ctx.characterData.moveData.velocity += -ctx.characterData.playerData.wallNormal;
 
-            ctx.smoke.SetVector3("position", ctx.moveData.origin - ctx.playerData.wallNormal / 2f);
-            ctx.smoke.SetVector3("direction", -ctx.moveData.velocity.normalized);
+            ctx.vfxController.smoke.SetVector3("position", ctx.characterData.moveData.origin - ctx.characterData.playerData.wallNormal / 2f);
+            ctx.vfxController.smoke.SetVector3("direction", -ctx.characterData.moveData.velocity.normalized);
 
             // if (ctx.jumpTimer <= 0f) {
 
-            //     ctx.moveData.velocity += -ctx.playerData.wallNormal;
-            //     ctx.moveData.velocity.y = Mathf.Lerp(ctx.moveData.velocity.y, 0f, Time.deltaTime / 2f);
+            //     ctx.characterData.moveData.velocity += -ctx.characterData.playerData.wallNormal;
+            //     ctx.characterData.moveData.velocity.y = Mathf.Lerp(ctx.characterData.moveData.velocity.y, 0f, Time.deltaTime / 2f);
 
             // }
 
 
-            // if (ctx.playerData.wishJumpDown) {
+            // if (ctx.characterData.playerData.wishJumpDown) {
             //     // ctx.framingCam.m_CameraDistance = Mathf.Lerp(ctx.framingCam.m_CameraDistance, 3f, Time.deltaTime * 4f);
-            //     ctx.sphereLines.SetFloat("Speed", -ctx.playerData.vCharge);
+            //     ctx.sphereLines.SetFloat("Speed", -ctx.characterData.playerData.vCharge);
             //     ctx.sphereLines.Play();
                 
-            //     // SubtractVelocityAgainst(ref ctx.moveData.velocity, -ctx.moveData.velocity.normalized, ctx.moveData.velocity.magnitude / 4f);
+            //     // SubtractVelocityAgainst(ref ctx.characterData.moveData.velocity, -ctx.characterData.moveData.velocity.normalized, ctx.characterData.moveData.velocity.magnitude / 4f);
 
             //     BrakeCharge(ctx.avatarLookForward);
             // }
 
-            // if (ctx.playerData.wishJumpUp) {
-            //     BoostJump((ctx.playerData.wallNormal + ctx.avatarLookForward).normalized, Mathf.Max(ctx.moveData.velocity.magnitude, 20f));
+            // if (ctx.characterData.playerData.wishJumpUp) {
+            //     BoostJump((ctx.characterData.playerData.wallNormal + ctx.avatarLookForward).normalized, Mathf.Max(ctx.characterData.moveData.velocity.magnitude, 20f));
             //     ctx.sphereLines.Stop();
             // }
 
         } else { // falling state
 
-            // ctx.bezierCurve.PredictGravityArc(ctx.moveData.origin, ctx.moveConfig.gravity, ctx.moveData.velocity);
+            // ctx.bezierCurve.PredictGravityArc(ctx.characterData.moveData.origin, ctx.moveConfig.gravity, ctx.characterData.moveData.velocity);
             // ctx.bezierCurve.DrawProjection();
 
-            // if (ctx.playerData.wishJumpDown && !ctx.doubleJump) {
-            //     SubtractVelocityAgainst(ref ctx.moveData.velocity, -ctx.moveData.velocity.normalized, ctx.moveData.velocity.magnitude / 2f);
+            // if (ctx.characterData.playerData.wishJumpDown && !ctx.doubleJump) {
+            //     SubtractVelocityAgainst(ref ctx.characterData.moveData.velocity, -ctx.characterData.moveData.velocity.normalized, ctx.characterData.moveData.velocity.magnitude / 2f);
             //     ctx.vcam.m_CameraDistance = Mathf.Lerp(ctx.vcam.m_CameraDistance, 3f, Time.deltaTime * 4f);
 
             //     BrakeCharge();
 
-            //     ctx.sphereLines.SetFloat("Speed", -ctx.playerData.vCharge);
+            //     ctx.sphereLines.SetFloat("Speed", -ctx.characterData.playerData.vCharge);
 
             //     ctx.sphereLines.Play();
             // }
 
-            // if (ctx.playerData.wishJumpUp) {
+            // if (ctx.characterData.playerData.wishJumpUp) {
             //     AirJump(Vector3.up);
             //     ctx.sphereLines.Stop();
             // }
@@ -153,4 +147,5 @@ public class PlayerStateAir : PlayerBaseState {
         }
     }
 
+}
 }

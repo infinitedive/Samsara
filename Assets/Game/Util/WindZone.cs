@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Game.Controllers;
 
 public class WindZone : MonoBehaviour
 {
@@ -18,18 +19,17 @@ public class WindZone : MonoBehaviour
 
     private void OnTriggerStay(Collider other) {
 
-        PlayerCharacter player = other.GetComponent<PlayerCharacter>();
+        SkateCharacterController ctx = other.GetComponent<SkateCharacterController>();
         
         
-        if (player) {
-            Debug.Log(player);
-            float accelAmount= Vector3.Dot(player.moveData.velocity, transform.forward);
+        if (ctx) {
+            float accelAmount= Vector3.Dot(ctx.characterData.moveData.velocity, transform.forward);
             float speed = 20f;
 
             if (accelAmount < speed) {
-                player.preUpdateEnvironmentForces = transform.forward * (speed - accelAmount);
-                player.ignoreGravityTimer = .1f;
-                player.playerData.grounded = false;
+                ctx.preUpdateEnvironmentForces = transform.forward * (speed - accelAmount);
+                ctx.timerController.ignoreGravityTimer = .1f;
+                ctx.characterData.playerData.grounded = false;
             }
 
             // EventManager.Knockback(player, Vector3.forward, 15f);

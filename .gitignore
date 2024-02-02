@@ -27,6 +27,8 @@
 /Assets/TextMesh*
 /Assets/Scalable*
 /Assets/TooMany*
+/Assets/SceneDependencyCache
+/Assets/SimplePixelUI
 
 *.csproj
 *.meta
