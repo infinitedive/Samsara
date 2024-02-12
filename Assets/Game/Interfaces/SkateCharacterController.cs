@@ -107,7 +107,7 @@ namespace Game.Controllers {
 
             ClampVelocity();
             collisionHandler.ResolveCollisions();
-            animationController.DoBlendAnimations();
+            // animationController.DoBlendAnimations();
             CheckGrapplePress();
             cameraController.CameraSettings();
 
@@ -148,6 +148,9 @@ namespace Game.Controllers {
             targettingHandler.AimAssist();
 
             TransformRotation();
+
+            // adjustment.z = playerInput.z * speed - Vector3.Dot(relativeVelocity, zAxis);
+            // velocity += xAxis * adjustment.x + zAxis * adjustment.z;
 
             characterData.zVel = Vector3.Dot(characterData.moveData.velocity, characterData.bodyForward);
             characterData.yVel = Vector3.Dot(characterData.moveData.velocity, characterData.bodyUp);
@@ -237,29 +240,67 @@ namespace Game.Controllers {
 
                 // AimAssist();
 
-                characterData.focusOnThis.position = Vector3.Lerp(characterData.focusOnThis.position, characterData.playerData.focusPoint, Time.deltaTime * 10f);
+                // characterData.focusOnThis.position = Vector3.Lerp(characterData.focusOnThis.position, characterData.playerData.focusPoint, Time.deltaTime * 10f);
                 
                 Vector3 combinedLookPosition = characterData.lookAtThis.position;
                 Quaternion combinedLookRotation = Quaternion.LookRotation((combinedLookPosition - characterData.avatarLookTransform.position).normalized, Vector3.up);
 
                 if (characterData.moveData.velocity.magnitude > characterData.moveConfig.walkSpeed) { // TODO: make bodyTransform not this transform
                     characterData.avatarLookRotation = Quaternion.Slerp(characterData.avatarLookRotation, combinedLookRotation, Time.deltaTime * 20f);
-                    characterData.bodyRotation = Quaternion.Slerp(characterData.bodyRotation, FlatLookRotation(characterData.viewForward), Time.deltaTime * 5f);
+                    characterData.avatarLookRotation = combinedLookRotation;
+                    // characterData.bodyRotation = Quaternion.Slerp(characterData.bodyRotation, FlatLookRotation(characterData.viewForward), Time.deltaTime * 5f);
                     // characterData.bodyRotation = Quaternion.Slerp(characterData.bodyRotation, Quaternion.LookRotation(characterData.viewForward), Time.deltaTime * 5f);
                     characterData.velocityRotation = Quaternion.LookRotation(characterData.moveData.velocity);
                 } else {
                     characterData.avatarLookRotation = Quaternion.Slerp(characterData.avatarLookRotation, combinedLookRotation, Time.deltaTime * 20f);
-                    
+                    characterData.avatarLookRotation = combinedLookRotation;
                     if (characterData.firstPersonCam.Priority == 1) {
-                        characterData.avatarLookRotation = combinedLookRotation;
-                        characterData.bodyRotation = FlatLookRotation(characterData.avatarLookForward);
+                        // characterData.avatarLookRotation = combinedLookRotation;
+                        // characterData.bodyRotation = FlatLookRotation(characterData.avatarLookForward);
                     } else {
 
-                        characterData.bodyRotation = Quaternion.Slerp(characterData.bodyRotation, FlatLookRotation(characterData.viewForward), Time.deltaTime * 5f);
+                        // characterData.bodyRotation = Quaternion.Slerp(characterData.bodyRotation, FlatLookRotation(characterData.viewForward), Time.deltaTime * 5f);
                         
                     }
                     characterData.velocityRotation = characterData.bodyRotation;
                 }
+
+                float distance = (characterData.moveData.velocity * Time.deltaTime).magnitude;
+                float angle1 = distance * (180f / Mathf.PI) / .5f;
+                float ballAlignSpeed = 90f;
+
+                Quaternion AlignBallRotation (Vector3 rotationAxis, Quaternion rotation) {
+                    Vector3 ballAxis = characterData.bodyUp;
+                    float dot = Mathf.Clamp(Vector3.Dot(ballAxis, rotationAxis), -1f, 1f);
+                    float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+                    float maxAngle = ballAlignSpeed * Time.deltaTime;
+
+                    Quaternion newAlignment =
+                        Quaternion.FromToRotation(ballAxis, rotationAxis) * rotation;
+                    if (angle <= maxAngle) {
+                        return newAlignment;
+                    }
+                    else {
+                        return Quaternion.SlerpUnclamped(
+                            rotation, newAlignment, maxAngle / angle
+                        );
+                    }
+                }
+
+                Debug.Log(characterData.playerData.inputDir);
+
+                // characterData.transform.localRotation = 
+                if (Vector3.Dot(characterData.playerData.inputDir, characterData.avatarLookForward) > .2f) {
+                    characterData.bodyRotation = Quaternion.Euler(characterData.avatarLookRight * angle1) * characterData.bodyRotation;
+                    characterData.bodyRotation = AlignBallRotation(-characterData.avatarLookRight, characterData.bodyRotation);
+
+                } else if (Vector3.Dot(characterData.playerData.inputDir, characterData.avatarLookForward) < -.2f) {
+                    characterData.bodyRotation = Quaternion.Euler(-characterData.avatarLookRight * angle1) * characterData.bodyRotation;
+                    characterData.bodyRotation = AlignBallRotation(-characterData.avatarLookRight, characterData.bodyRotation);
+
+                }
+
+                // TODO: think about inverting velocity movement
 
                 // 28 46
 
@@ -323,7 +364,7 @@ namespace Game.Controllers {
                         Quaternion.AngleAxis(characterData.viewTransformLook.z, Vector3.forward) *
                         Quaternion.AngleAxis(characterData.viewTransformLook.x, Vector3.right);
 
-                    Vector3 vanishingPoint = characterData.avatarLookTransform.position + characterData.cam.transform.forward * 20f;
+                    Vector3 vanishingPoint = characterData.avatarLookTransform.position + characterData.viewForward* 20f;
 
                     characterData.lookAtThis.position = vanishingPoint;
 

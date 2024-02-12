@@ -45,7 +45,7 @@ namespace Game.Controllers {
 
         public void Awake() {
 
-            grappleGun = transform.GetChild(4).transform.GetChild(1).gameObject;
+            grappleGun = transform.GetChild(3).transform.GetChild(1).gameObject;
 
             grappleArc = grappleGun.GetComponent<VisualEffect>();
             smoke = smokeObj.GetComponent<VisualEffect>();

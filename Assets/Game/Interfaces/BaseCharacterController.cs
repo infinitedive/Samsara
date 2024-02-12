@@ -100,6 +100,8 @@ namespace Game {
                 characterData.playerData.input = context.ReadValue<Vector2>();
                 characterData.playerData.input.z = characterData.playerData.input.y;
                 characterData.playerData.input.y = 0f;
+                characterData.playerData.inputDir = characterData.playerData.input.normalized;
+
             };
     
             characterData.playerControls.Player.Move.canceled += context => {
@@ -108,7 +110,10 @@ namespace Game {
                 characterData.playerData.input = context.ReadValue<Vector2>();
                 characterData.playerData.input.z = characterData.playerData.input.y;
                 characterData.playerData.input.y = 0f;
+                characterData.playerData.inputDir = characterData.playerData.input.normalized;
+
             };
+
     
             characterData.playerControls.Player.Run.started += context => {
                 characterData.playerData.wishRunDown = true;

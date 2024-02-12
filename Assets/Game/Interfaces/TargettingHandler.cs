@@ -28,7 +28,8 @@ namespace Game.Controllers {
 
             RaycastHit hit;
 
-            if (!characterData.playerData.attacking && !characterData.playerData.grappling) { // aim assist stuff
+            // if (!characterData.playerData.attacking && !characterData.playerData.grappling) { // aim assist stuff
+            if (false) {
 
                 for (float i = 1f; i <= characterData.moveConfig.maxDistance; i++) {
 

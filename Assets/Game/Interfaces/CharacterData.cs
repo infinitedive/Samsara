@@ -91,7 +91,7 @@ namespace Game.Data {
 
             playerControls = new PlayerControls();
 
-            avatarCamera = avatarLookTransform.gameObject.GetComponent<Camera>();
+            // avatarCamera = avatarLookTransform.gameObject.GetComponent<Camera>();
 
             lookAtThis.position = Vector3.zero;
             lookAtThis.localPosition = Vector3.zero;

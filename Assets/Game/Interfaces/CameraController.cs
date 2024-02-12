@@ -24,11 +24,11 @@ namespace Game.Controllers {
 
             characterData.framingCam.m_UnlimitedSoftZone = false;
 
-            if (characterData.playerData.detectWall && characterData.firstPersonCam.Priority != 1) {
-                characterData.framingCam.m_ScreenX = Mathf.Lerp(characterData.framingCam.m_ScreenX, 0.5f + Vector3.Dot(characterData.playerData.wallNormal, -characterData.viewRight) / 3f, Time.deltaTime * 2f);
-            } else {
-                characterData.framingCam.m_ScreenX = Mathf.Lerp(characterData.framingCam.m_ScreenX, 0.5f, Time.deltaTime);
-            }
+            // if (characterData.playerData.detectWall && characterData.firstPersonCam.Priority != 1) {
+            //     characterData.framingCam.m_ScreenX = Mathf.Lerp(characterData.framingCam.m_ScreenX, 0.5f + Vector3.Dot(characterData.playerData.wallNormal, -characterData.viewRight) / 3f, Time.deltaTime * 2f);
+            // } else {
+            //     characterData.framingCam.m_ScreenX = Mathf.Lerp(characterData.framingCam.m_ScreenX, 0.5f, Time.deltaTime);
+            // }
 
             // push character from center
 
@@ -53,7 +53,7 @@ namespace Game.Controllers {
 
             // }
 
-            characterData.framingCam.m_TrackedObjectOffset = Vector3.Lerp(characterData.framingCam.m_TrackedObjectOffset, cameraShift * 1.5f, Time.deltaTime * 4f); // jitter
+            // characterData.framingCam.m_TrackedObjectOffset = Vector3.Lerp(characterData.framingCam.m_TrackedObjectOffset, cameraShift * 1.5f, Time.deltaTime * 4f); // jitter
 
             // fov changes with speed
 
@@ -92,11 +92,11 @@ namespace Game.Controllers {
             // toggling between first and third person
 
             if (characterData.firstPersonCam.Priority == 1) {
-                characterData.framingCam.m_CameraDistance = Mathf.Lerp(characterData.framingCam.m_CameraDistance, 0f, Time.deltaTime*2f);
+                // characterData.framingCam.m_CameraDistance = Mathf.Lerp(characterData.framingCam.m_CameraDistance, 0f, Time.deltaTime*2f);
             } else {
-                characterData.framingCam.m_CameraDistance = Mathf.Lerp(characterData.framingCam.m_CameraDistance, Mathf.Max(Vector3.Dot(characterData.moveData.velocity, characterData.viewForward) / 4f, 2.5f), Time.deltaTime * 2f);
-                characterData.followCam.CameraDistance = Mathf.Lerp(characterData.followCam.CameraDistance, Mathf.Max(characterData.moveData.velocity.magnitude / 4f, 2.5f), Time.deltaTime * 2f);
-                characterData.followCam.ShoulderOffset.x = characterData.followCam.CameraDistance;
+                // characterData.framingCam.m_CameraDistance = Mathf.Lerp(characterData.framingCam.m_CameraDistance, Mathf.Max(Vector3.Dot(characterData.moveData.velocity, characterData.viewForward) / 4f, 2.5f), Time.deltaTime * 2f);
+                // characterData.followCam.CameraDistance = Mathf.Lerp(characterData.followCam.CameraDistance, Mathf.Max(characterData.moveData.velocity.magnitude / 4f, 2.5f), Time.deltaTime * 2f);
+                // characterData.followCam.ShoulderOffset.x = characterData.followCam.CameraDistance;
             }
 
             // rule of thirds camera framing, clamp at .666
