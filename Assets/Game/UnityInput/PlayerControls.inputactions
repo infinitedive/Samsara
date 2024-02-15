@@ -139,15 +139,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "e",
-                    "type": "Button",
-                    "id": "7dcf1e84-5493-4cf6-b4b1-27e7e0af49e5",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -373,6 +364,17 @@
                 },
                 {
                     "name": "",
+                    "id": "37ad68c6-021b-4664-a0fe-b292bb58296a",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Dash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "eb108806-6447-400d-bfbf-a0777a0d1913",
                     "path": "<Gamepad>/buttonEast",
                     "interactions": "",
@@ -511,17 +513,6 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "Grapple",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "c9780308-6eb1-4b2b-b546-d50177e0a397",
-                    "path": "",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "e",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

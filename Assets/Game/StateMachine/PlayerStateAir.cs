@@ -23,26 +23,26 @@ namespace Game.StateMachine
     public override void UpdateState()
     {
 
-        if (ctx.timerController.ignoreGravityTimer > 0f || ctx.characterData.playerData.detectWall || currentSubState.name == "burst") {  } 
+        if (ctx.timerController.ignoreGravityTimer > 0f || ctx.characterData.playerData.detectWall || currentSubState.name == "burst" || currentSubState.name == "clutch") {  } 
         else  {
             ctx.characterData.moveData.velocity.y -= (ctx.characterData.moveConfig.gravity * Time.deltaTime * 1f);
         }
 
-        Debug.Log(currentSubState.name);
-
-
 
         // AirMovement();
-        OnlyAngularVelocity(ctx.characterData.playerData.wishMove, 1f);
+        // OnlyAngularVelocity(ctx.characterData.playerData.wishMove, 1f);
 
         ctx.collisionHandler.CollisionCheck();
 
         if (ctx.characterData.playerData.detectWall) {
-            ctx.characterData.moveData.velocity.y = Mathf.Lerp(ctx.characterData.moveData.velocity.y, 0f, Time.deltaTime * 8f);
+            ctx.characterData.moveData.velocity.y = Mathf.Lerp(ctx.characterData.moveData.velocity.y, 0f, Time.deltaTime * 10f);
             // ctx.characterData.moveData.velocity.y = 0f;
 
-            if (ctx.characterData.playerData.wishJumpUp) {
-                Jump((2f * ctx.characterData.playerData.wallNormal + Vector3.up).normalized * 3f);
+            ctx.characterData.moveData.velocity -= ctx.characterData.playerData.wallNormal;
+
+            if (ctx.characterData.playerData.wishJumpUp && ctx.timerController.wallTouchTimer <= 0f) {
+                Jump((ctx.characterData.playerData.wallNormal * 2f + Vector3.up).normalized * 1.5f);
+                ctx.timerController.wallTouchTimer = .2f;
             }
         }
 
@@ -57,7 +57,17 @@ namespace Game.StateMachine
 
     public override void InitializeSubStates()
     {
-        SetSubState(factory.Neutral());
+
+        Debug.Log(currentSubState);
+
+        if (currentSubState == null || currentSubState.name == "neutral") {
+            SetSubState(factory.Neutral());
+
+        } else if (currentSubState.name == "burst") {
+            SetSubState(factory.Burst());
+        } else if (currentSubState.name == "clutch") {
+            SetSubState(factory.Clutch());
+        }
     }
 
     public override void CheckSwitchStates()

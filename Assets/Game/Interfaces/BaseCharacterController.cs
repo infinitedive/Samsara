@@ -152,11 +152,6 @@ namespace Game {
                 
             };
     
-            characterData.playerControls.Player.LockOn.performed += context => {
-                characterData.playerData.lockOn = context.ReadValue<bool>();
-                
-            };
-    
             characterData.playerControls.Player.FastFall.performed += context => {
                 characterData.playerData.fastFall = context.ReadValue<bool>();
                 

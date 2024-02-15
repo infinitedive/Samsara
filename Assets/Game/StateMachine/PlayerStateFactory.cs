@@ -13,7 +13,8 @@ namespace Game.StateMachine {
             lunge,
             noop,
             dash,
-            burst
+            burst,
+            clutch
         }
     
         SkateCharacterController _context;
@@ -28,6 +29,7 @@ namespace Game.StateMachine {
             _states[State.grounded] = new PlayerStateGrounded(_context, this);
             _states[State.grapple] = new PlayerStateGrapple(_context, this);
             _states[State.burst] = new PlayerStateBurst(_context, this);
+            _states[State.clutch] = new PlayerStateClutch(_context, this);
     
             // sub states
     
@@ -54,6 +56,10 @@ namespace Game.StateMachine {
     
         public PlayerState Grapple() {
             return _states[State.grapple];
+        }
+
+        public PlayerState Clutch() {
+            return _states[State.clutch];
         }
 
         public PlayerState Burst() {

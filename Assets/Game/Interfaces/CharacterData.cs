@@ -62,6 +62,7 @@ namespace Game.Data {
         public Transform bodyTransform;
         [HideInInspector] public Quaternion avatarLookRotation { get { return avatarLookTransform.rotation; } set { avatarLookTransform.rotation = value; } }
         [HideInInspector] public Vector3 avatarLookForward { get { return avatarLookTransform.forward; } set { avatarLookTransform.forward = value; } }
+        [HideInInspector] public Vector3 avatarLookForwardFlat { get { return Vector3.ProjectOnPlane(avatarLookTransform.forward, Vector3.up); } }
         [HideInInspector] public Vector3 avatarLookRight { get { return avatarLookTransform.right; } }
         [HideInInspector] public Vector3 avatarLookUp { get { return avatarLookTransform.up; } }
         [HideInInspector] public Quaternion bodyRotation { get { return bodyTransform.rotation; } set { bodyTransform.rotation = value; } }

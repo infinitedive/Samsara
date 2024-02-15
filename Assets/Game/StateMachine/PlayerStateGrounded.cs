@@ -16,6 +16,7 @@ namespace Game.StateMachine
         {
             // Debug.Log("ENTER GROUNDED");
             // Debug.Log(ctx.moveData.velocity);
+            clutchFlag = true;
 
             InitializeSubStates();
         }
@@ -29,7 +30,11 @@ namespace Game.StateMachine
 
             // }
 
-            if (ctx.characterData.playerData.wishJumpPress && ctx.timerController.jumpTimer <= 0f) {
+            if (ctx.characterData.moveData.velocity.magnitude > ctx.characterData.moveConfig.runSpeed && currentSubState.name != "burst") {
+                ctx.characterData.moveData.velocity -= ctx.characterData.moveData.velocity * Time.deltaTime;
+            }
+
+            if (ctx.characterData.playerData.wishJumpUp && ctx.timerController.jumpTimer <= 0f) {
                 ctx.timerController.jumpTimer = .5f;
                 Jump();
             }
@@ -44,6 +49,7 @@ namespace Game.StateMachine
 
         public override void ExitState()
         {
+            Debug.Log(currentSubState);
             // ctx.smokeLand.SetVector3("direction", Vector3.ProjectOnPlane(ctx.moveData.velocity, ctx.groundNormal));
             // ctx.smokeLand.SetVector3("position", ctx.moveData.origin);
             // Debug.Log("EXIT GROUNDED");
@@ -54,15 +60,14 @@ namespace Game.StateMachine
 
         public override void InitializeSubStates()
         {
-            // if (ctx.playerData.attacking) {
-            //     SetSubState(factory.Lunge());
-            // } else if (ctx.playerData.wishShiftDown) {
-            //     // SetSubState(factory.Dash());
-            // } else {
+            if (currentSubState == null || currentSubState.name == "neutral") {
                 SetSubState(factory.Neutral());
-            // }
 
-            
+            } else if (currentSubState.name == "burst") {
+                SetSubState(factory.Burst());
+            } else if (currentSubState.name == "clutch") {
+                SetSubState(factory.Clutch());
+            }
 
         }
 

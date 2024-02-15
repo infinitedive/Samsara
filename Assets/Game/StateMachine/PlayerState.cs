@@ -27,6 +27,7 @@ namespace Game.StateMachine {
         protected Quaternion avatarLookFlatSide;
         protected Vector3 flatForward = Vector3.zero;
         protected Vector3 flatForwardSide = Vector3.zero;
+        protected bool clutchFlag = true;
 
         public PlayerState(SkateCharacterController currentContext, PlayerStateFactory playerStateFactory) {
             _ctx = currentContext;
@@ -67,6 +68,7 @@ namespace Game.StateMachine {
             newState.EnterState();
 
             if (_isRootState) {
+                newState.SetSubState(currentSubState);
                 _ctx.currentState = newState;
             } else if (_currentSuperState != null) {
                 _currentSuperState.SetSubState(newState);
@@ -261,9 +263,19 @@ namespace Game.StateMachine {
 
             Vector3 neutralMove = (avatarLookFlat * targetVelocity);
 
-            float yVel = ctx.characterData.moveData.velocity.y;
-            ctx.characterData.moveData.velocity = Vector3.Lerp(ctx.characterData.moveData.velocity, targetVelocity, Time.deltaTime * 8f);
-            ctx.characterData.moveData.velocity.y = yVel;
+            if (ctx.characterData.moveData.velocity.magnitude > targetVelocity.magnitude) {
+
+                float yVel = ctx.characterData.moveData.velocity.y;
+                ctx.characterData.moveData.velocity = Vector3.Lerp(ctx.characterData.moveData.velocity, Vector3.ClampMagnitude(targetVelocity, ctx.characterData.moveData.velocity.magnitude), Time.deltaTime * 8f);
+                ctx.characterData.moveData.velocity.y = yVel;
+
+            } else {
+
+                float yVel = ctx.characterData.moveData.velocity.y;
+                ctx.characterData.moveData.velocity = Vector3.Lerp(ctx.characterData.moveData.velocity, targetVelocity, Time.deltaTime * 8f);
+                ctx.characterData.moveData.velocity.y = yVel;
+            }
+
 
         }
 

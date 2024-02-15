@@ -5898,7 +5898,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gravity: 10
-  jumpForce: 10
+  jumpForce: 12
   boostForce: 10
   maxVelocity: 40
   terminalVelocity: 40
@@ -6583,10 +6583,6 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: f4d4ea08-8dec-44fd-9e98-cc386251230d
     m_ActionName: Player/SuperJump
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 7dcf1e84-5493-4cf6-b4b1-27e7e0af49e5
-    m_ActionName: Player/e
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Player

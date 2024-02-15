@@ -5,11 +5,14 @@ namespace Game.StateMachine
 
 {
 
-    public class PlayerStateNeutral : PlayerState {
 
-        public PlayerStateNeutral(SkateCharacterController currentContext, PlayerStateFactory playerStateFactory) : base (currentContext, playerStateFactory) {
+    public class PlayerStateClutch : PlayerState {
+
+
+
+        public PlayerStateClutch(SkateCharacterController currentContext, PlayerStateFactory playerStateFactory) : base (currentContext, playerStateFactory) {
             _isRootState = false;
-            name = "neutral";
+            name = "clutch";
         }
 
         public override void EnterState() // action
@@ -17,40 +20,24 @@ namespace Game.StateMachine
             // oldMomentum = Vector3.Scale(ctx.playerData.velocity, new Vector3(1f, 0f, 1f));
             // Debug.Log("ENTER NEUTRAL");
             // Debug.Log(ctx.moveData.velocity);
-            time = 0f;
+            time = 1f;
+            clutchFlag = false;
+            
         }
 
         public override void UpdateState() // duration
         {
 
-            if (ctx.characterData.playerData.grounded && ctx.characterData.moveData.velocity.magnitude <= ctx.characterData.moveConfig.runSpeed) {
+            ctx.characterData.moveData.velocity = Vector3.Lerp(ctx.characterData.moveData.velocity, Vector3.zero, Time.deltaTime * 4f);
 
-                WalkMovementUpdate();
-
-                // if (ctx.playerData.wishDashUp) {
-                //     Dash();
-                // }
-
-            } else {
-                SkateMovementUpdate(Mathf.Pow(3f, .5f));
-            }
-
-            if (ctx.characterData.playerData.wishJumpDown) {
-
-                
-
-            }
-
-            // if (ctx.playerData.wishFirePress) {
-            //     ctx.TriggerThing();
-            // }
+            time -= Time.deltaTime;
 
             CheckSwitchStates();
         }
 
         public override void ExitState() // completion
         {
-
+            ctx.characterData.moveData.velocity = ctx.characterData.moveConfig.runSpeed * ctx.characterData.avatarLookForwardFlat;
         }
 
         public override void InitializeSubStates()
@@ -60,9 +47,13 @@ namespace Game.StateMachine
 
         public override void CheckSwitchStates()
         {
-            if (ctx.characterData.playerData.wishDashPress && ctx.characterData.playerData.grounded) {
+            if (time <= 0f) {
                 SwitchState(factory.Burst());
             }
+
+            // if (ctx.playerData.wishDashPress && ctx.playerData.grounded) {
+            //     SwitchState(factory.Dash());
+            // }
 
             // if (ctx.playerData.wishFireDown) {
             //     SwitchState(factory.Lunge());

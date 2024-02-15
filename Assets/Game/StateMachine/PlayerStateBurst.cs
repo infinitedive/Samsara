@@ -5,7 +5,10 @@ namespace Game.StateMachine
 
 {
 
+
     public class PlayerStateBurst : PlayerState {
+
+
 
         public PlayerStateBurst(SkateCharacterController currentContext, PlayerStateFactory playerStateFactory) : base (currentContext, playerStateFactory) {
             _isRootState = false;
@@ -15,14 +18,18 @@ namespace Game.StateMachine
         public override void EnterState() // action
         {
             // oldMomentum = Vector3.Scale(ctx.playerData.velocity, new Vector3(1f, 0f, 1f));
-            // Debug.Log("ENTER NEUTRAL");
+            Debug.Log("ENTER Burst");
             // Debug.Log(ctx.moveData.velocity);
-            time = 0f;
-            ctx.characterData.moveData.velocity *= 1.5f;
+            time = 2f;
+
+            
+            
         }
 
         public override void UpdateState() // duration
         {
+
+            ctx.characterData.moveData.velocity = Vector3.Lerp(ctx.characterData.moveData.velocity, ctx.characterData.moveData.velocity * 1.1f, Time.deltaTime * 8f);
 
             if (true) {
 
@@ -40,18 +47,24 @@ namespace Game.StateMachine
 
                 
 
+            } else if (ctx.characterData.playerData.wishJumpUp) {
+
             }
 
             // if (ctx.playerData.wishFirePress) {
             //     ctx.TriggerThing();
             // }
 
+            Debug.Log(time);
+
+            time -= Time.deltaTime;
+
             CheckSwitchStates();
         }
 
         public override void ExitState() // completion
         {
-
+            Debug.Log("EXIT BURST");
         }
 
         public override void InitializeSubStates()
@@ -61,8 +74,12 @@ namespace Game.StateMachine
 
         public override void CheckSwitchStates()
         {
-            if (!ctx.characterData.playerData.wishJumpDown) {
+            if (time <= 0f) {
                 SwitchState(factory.Neutral());
+            }
+
+            if (ctx.characterData.playerData.wishDashPress) {
+                SwitchState(factory.Clutch());
             }
 
             // if (ctx.playerData.wishDashPress && ctx.playerData.grounded) {

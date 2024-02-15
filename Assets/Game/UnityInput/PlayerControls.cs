@@ -161,15 +161,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""e"",
-                    ""type"": ""Button"",
-                    ""id"": ""7dcf1e84-5493-4cf6-b4b1-27e7e0af49e5"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -395,6 +386,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""37ad68c6-021b-4664-a0fe-b292bb58296a"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Dash"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""eb108806-6447-400d-bfbf-a0777a0d1913"",
                     ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
@@ -533,17 +535,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
                     ""action"": ""Grapple"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""c9780308-6eb1-4b2b-b546-d50177e0a397"",
-                    ""path"": """",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""e"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1146,7 +1137,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Player_SwitchWeapon = m_Player.FindAction("SwitchWeapon", throwIfNotFound: true);
         m_Player_LockOn = m_Player.FindAction("LockOn", throwIfNotFound: true);
         m_Player_SuperJump = m_Player.FindAction("SuperJump", throwIfNotFound: true);
-        m_Player_e = m_Player.FindAction("e", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1235,7 +1225,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_SwitchWeapon;
     private readonly InputAction m_Player_LockOn;
     private readonly InputAction m_Player_SuperJump;
-    private readonly InputAction m_Player_e;
     public struct PlayerActions
     {
         private @PlayerControls m_Wrapper;
@@ -1255,7 +1244,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @SwitchWeapon => m_Wrapper.m_Player_SwitchWeapon;
         public InputAction @LockOn => m_Wrapper.m_Player_LockOn;
         public InputAction @SuperJump => m_Wrapper.m_Player_SuperJump;
-        public InputAction @e => m_Wrapper.m_Player_e;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1310,9 +1298,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @SuperJump.started += instance.OnSuperJump;
             @SuperJump.performed += instance.OnSuperJump;
             @SuperJump.canceled += instance.OnSuperJump;
-            @e.started += instance.OnE;
-            @e.performed += instance.OnE;
-            @e.canceled += instance.OnE;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -1362,9 +1347,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @SuperJump.started -= instance.OnSuperJump;
             @SuperJump.performed -= instance.OnSuperJump;
             @SuperJump.canceled -= instance.OnSuperJump;
-            @e.started -= instance.OnE;
-            @e.performed -= instance.OnE;
-            @e.canceled -= instance.OnE;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1562,7 +1544,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnSwitchWeapon(InputAction.CallbackContext context);
         void OnLockOn(InputAction.CallbackContext context);
         void OnSuperJump(InputAction.CallbackContext context);
-        void OnE(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

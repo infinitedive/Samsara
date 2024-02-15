@@ -176,8 +176,6 @@ namespace Game.Controllers {
 
             speedBall.transform.localScale = Vector3.Lerp(speedBall.transform.localScale, new Vector3(2f, 2f - squashY, z), Time.deltaTime * 8f);
 
-            
-
             characterData.playerData.wishJumpUp = false;
             characterData.playerData.wishJumpPress = false;
             characterData.playerData.wishRunUp = false;
@@ -305,15 +303,15 @@ namespace Game.Controllers {
                 }
 
                 // characterData.transform.localRotation = 
-                if (Vector3.Dot(characterData.playerData.wishMove, characterData.avatarLookForward) > .5f) {
+                // if (Vector3.Dot(characterData.moveData.velocity.normalized, characterData.avatarLookForward) > .5f) {
                     characterData.bodyRotation = Quaternion.Euler(rotationAxis * angle1) * characterData.bodyRotation;
                     characterData.bodyRotation = AlignBallRotation(rotationAxis, characterData.bodyRotation);
 
-                } else if (Vector3.Dot(characterData.playerData.wishMove, characterData.avatarLookForward) < -.5f) {
-                    characterData.bodyRotation = Quaternion.Euler(-rotationAxis * angle1) * characterData.bodyRotation;
-                    characterData.bodyRotation = AlignBallRotation(rotationAxis, characterData.bodyRotation);
+                // } else if (Vector3.Dot(characterData.moveData.velocity.normalized, characterData.avatarLookForward) < -.5f) {
+                //     characterData.bodyRotation = Quaternion.Euler(-rotationAxis * angle1) * characterData.bodyRotation;
+                //     characterData.bodyRotation = AlignBallRotation(rotationAxis, characterData.bodyRotation);
 
-                }
+                // }
 
                 // TODO: think about inverting velocity movement
 
