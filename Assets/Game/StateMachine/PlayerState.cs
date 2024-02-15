@@ -116,6 +116,16 @@ namespace Game.StateMachine {
 
         }
 
+        protected void Jump(Vector3 direction) {
+
+            ctx.timerController.jumpTimer = Time.deltaTime;
+            ctx.timerController.ignoreGravityTimer = Time.deltaTime;
+
+            float forceJump = ctx.characterData.moveConfig.jumpForce; // 10 force vs 20 gravity = 3 units high, 1 second long
+            ctx.characterData.moveData.velocity += direction * forceJump;
+
+        }
+
 
         protected void Vertical() {
 
@@ -181,7 +191,7 @@ namespace Game.StateMachine {
             
         }
 
-        protected void FlyMovementUpdate(ref Vector3 influencedV) {
+        protected void FlyMovementUpdate() {
             
             Vector3 influence = ctx.characterData.playerData.wishMove * ctx.characterData.moveData.velocity.magnitude * Mathf.Pow(3f, .5f);
 
@@ -198,7 +208,9 @@ namespace Game.StateMachine {
             float lookingRightY = Vector3.Dot(influence.normalized, ctx.characterData.velocityRight);
             float lookingBackY = Vector3.Dot(influence.normalized, -ctx.characterData.velocityForward);
 
-            influencedV += angularAccelerationY * (Time.deltaTime) + angularAccelerationX * (Time.deltaTime);
+            float newSpeed = ctx.characterData.moveConfig.runSpeed - ctx.characterData.moveData.velocity.magnitude;
+
+            ctx.characterData.moveData.velocity += angularAccelerationY * (Time.deltaTime) + angularAccelerationX * (Time.deltaTime);
             
         }
 

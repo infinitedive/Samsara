@@ -5,11 +5,11 @@ namespace Game.StateMachine
 
 {
 
-    public class PlayerStateNeutral : PlayerState {
+    public class PlayerStateBurst : PlayerState {
 
-        public PlayerStateNeutral(SkateCharacterController currentContext, PlayerStateFactory playerStateFactory) : base (currentContext, playerStateFactory) {
+        public PlayerStateBurst(SkateCharacterController currentContext, PlayerStateFactory playerStateFactory) : base (currentContext, playerStateFactory) {
             _isRootState = false;
-            name = "neutral";
+            name = "burst";
         }
 
         public override void EnterState() // action
@@ -18,14 +18,15 @@ namespace Game.StateMachine
             // Debug.Log("ENTER NEUTRAL");
             // Debug.Log(ctx.moveData.velocity);
             time = 0f;
+            ctx.characterData.moveData.velocity *= 1.5f;
         }
 
         public override void UpdateState() // duration
         {
 
-            if (!ctx.characterData.playerData.wishRunDown) {
+            if (true) {
 
-                WalkMovementUpdate();
+                FlyMovementUpdate();
 
                 // if (ctx.playerData.wishDashUp) {
                 //     Dash();
@@ -60,9 +61,13 @@ namespace Game.StateMachine
 
         public override void CheckSwitchStates()
         {
-            if (ctx.characterData.playerData.wishJumpPress) {
-                SwitchState(factory.Burst());
+            if (!ctx.characterData.playerData.wishJumpDown) {
+                SwitchState(factory.Neutral());
             }
+
+            // if (ctx.playerData.wishDashPress && ctx.playerData.grounded) {
+            //     SwitchState(factory.Dash());
+            // }
 
             // if (ctx.playerData.wishFireDown) {
             //     SwitchState(factory.Lunge());

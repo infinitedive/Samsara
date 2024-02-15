@@ -15,6 +15,9 @@ namespace Game.Data {
         // void HandleDamage(PlayerCharacter target, float damageAmount);
         // void HandleStagger(PlayerCharacter target, float duration);
 
+        [HideInInspector] public Vector3 lastContactRight = Vector3.up;
+        [HideInInspector] public Vector3 lastSteepRight = Vector3.up;
+
         [HideInInspector] public float zVel;
         [HideInInspector] public float xVel;
         [HideInInspector] public float yVel;
@@ -56,14 +59,15 @@ namespace Game.Data {
         [HideInInspector] public Vector3 viewRight { get { return cam.transform.right; } }
         [HideInInspector] public Vector3 viewUp { get { return cam.transform.up; } }
         public Transform avatarLookTransform;
+        public Transform bodyTransform;
         [HideInInspector] public Quaternion avatarLookRotation { get { return avatarLookTransform.rotation; } set { avatarLookTransform.rotation = value; } }
         [HideInInspector] public Vector3 avatarLookForward { get { return avatarLookTransform.forward; } set { avatarLookTransform.forward = value; } }
         [HideInInspector] public Vector3 avatarLookRight { get { return avatarLookTransform.right; } }
         [HideInInspector] public Vector3 avatarLookUp { get { return avatarLookTransform.up; } }
-        [HideInInspector] public Quaternion bodyRotation { get { return transform.rotation; } set { transform.rotation = value; } }
-        [HideInInspector] public Vector3 bodyForward { get { return transform.forward; } }
-        [HideInInspector] public Vector3 bodyRight { get { return transform.right; } }
-        [HideInInspector] public Vector3 bodyUp { get { return transform.up; } }
+        [HideInInspector] public Quaternion bodyRotation { get { return bodyTransform.rotation; } set { bodyTransform.rotation = value; } }
+        [HideInInspector] public Vector3 bodyForward { get { return bodyTransform.forward; } }
+        [HideInInspector] public Vector3 bodyRight { get { return bodyTransform.right; } }
+        [HideInInspector] public Vector3 bodyUp { get { return bodyTransform.up; } }
         [HideInInspector] public Quaternion velocityRotation;
         [HideInInspector] public Vector3 velocityForward { get { return velocityRotation * Vector3.forward; } }
         [HideInInspector] public Vector3 velocityRight { get { return velocityRotation * Vector3.right; } }

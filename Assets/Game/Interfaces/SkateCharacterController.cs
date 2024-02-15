@@ -11,6 +11,11 @@ namespace Game.Controllers {
     
     public class SkateCharacterController : BaseCharacterController
     {
+
+        
+
+        
+
         // public virtual void HandleDamage(PlayerCharacter target, float damageAmount){}
         // public virtual void HandleKnockback(PlayerCharacter target, Vector3 direction, float knockbackAmount){}
         // public virtual void HandleStagger(PlayerCharacter target, float duration){}
@@ -44,8 +49,11 @@ namespace Game.Controllers {
         public bool isTrailActive;
         [HideInInspector] public float meshRefreshRate = 0.1f;
         [HideInInspector] public float activeTime = 2f;
+
+
     
         protected void Awake() {
+
     
             
             // animationController.animator = transform.GetChild(0).GetComponent<Animator>();
@@ -100,13 +108,13 @@ namespace Game.Controllers {
 
             timerController.DecrementTimers();
             targettingHandler.FindTargets();
+            collisionHandler.ResolveCollisions();
 
             Vector3 positionalMovement = transform.position - prevPosition; // TODO: 
             transform.position = prevPosition;
             characterData.moveData.origin += positionalMovement;
 
             ClampVelocity();
-            collisionHandler.ResolveCollisions();
             // animationController.DoBlendAnimations();
             CheckGrapplePress();
             cameraController.CameraSettings();
@@ -126,7 +134,6 @@ namespace Game.Controllers {
                 // squash += -preUpdateEnvironmentForces;
                 preUpdateEnvironmentForces = Vector3.zero;
             }
-
 
             transform.position = characterData.moveData.origin;
             prevPosition = transform.position;
@@ -183,6 +190,8 @@ namespace Game.Controllers {
             characterData.playerData.wishAimUp = false;
             characterData.playerData.wishDashPress = false;
             characterData.playerData.wishDashUp = false;
+            characterData.playerData.detectWall = false;
+            characterData.playerData.wallNormal = Vector3.zero;
 
             if (characterData.playerData.wishEscapeDown) {
                 Application.Quit();
@@ -247,13 +256,12 @@ namespace Game.Controllers {
 
                 if (characterData.moveData.velocity.magnitude > characterData.moveConfig.walkSpeed) { // TODO: make bodyTransform not this transform
                     characterData.avatarLookRotation = Quaternion.Slerp(characterData.avatarLookRotation, combinedLookRotation, Time.deltaTime * 20f);
-                    characterData.avatarLookRotation = combinedLookRotation;
+                    // characterData.avatarLookRotation = combinedLookRotation;
                     // characterData.bodyRotation = Quaternion.Slerp(characterData.bodyRotation, FlatLookRotation(characterData.viewForward), Time.deltaTime * 5f);
-                    // characterData.bodyRotation = Quaternion.Slerp(characterData.bodyRotation, Quaternion.LookRotation(characterData.viewForward), Time.deltaTime * 5f);
                     characterData.velocityRotation = Quaternion.LookRotation(characterData.moveData.velocity);
                 } else {
                     characterData.avatarLookRotation = Quaternion.Slerp(characterData.avatarLookRotation, combinedLookRotation, Time.deltaTime * 20f);
-                    characterData.avatarLookRotation = combinedLookRotation;
+                    // characterData.avatarLookRotation = combinedLookRotation;
                     if (characterData.firstPersonCam.Priority == 1) {
                         // characterData.avatarLookRotation = combinedLookRotation;
                         // characterData.bodyRotation = FlatLookRotation(characterData.avatarLookForward);
@@ -266,8 +274,8 @@ namespace Game.Controllers {
                 }
 
                 float distance = (characterData.moveData.velocity * Time.deltaTime).magnitude;
-                float angle1 = distance * (180f / Mathf.PI) / .5f;
-                float ballAlignSpeed = 90f;
+                float angle1 = distance * (180f / Mathf.PI);
+                float ballAlignSpeed = 180f;
 
                 Quaternion AlignBallRotation (Vector3 rotationAxis, Quaternion rotation) {
                     Vector3 ballAxis = characterData.bodyUp;
@@ -287,16 +295,23 @@ namespace Game.Controllers {
                     }
                 }
 
-                Debug.Log(characterData.playerData.inputDir);
+                Vector3 rotationAxis = Vector3.Cross(Vector3.up, characterData.moveData.velocity.normalized);
+
+                if (characterData.playerData.detectWall) {
+
+                    if (characterData.playerData.wallNormal != Vector3.zero) {
+                        rotationAxis = Vector3.Cross(characterData.playerData.wallNormal, characterData.moveData.velocity.normalized);
+                    }
+                }
 
                 // characterData.transform.localRotation = 
-                if (Vector3.Dot(characterData.playerData.inputDir, characterData.avatarLookForward) > .2f) {
-                    characterData.bodyRotation = Quaternion.Euler(characterData.avatarLookRight * angle1) * characterData.bodyRotation;
-                    characterData.bodyRotation = AlignBallRotation(-characterData.avatarLookRight, characterData.bodyRotation);
+                if (Vector3.Dot(characterData.playerData.wishMove, characterData.avatarLookForward) > .5f) {
+                    characterData.bodyRotation = Quaternion.Euler(rotationAxis * angle1) * characterData.bodyRotation;
+                    characterData.bodyRotation = AlignBallRotation(rotationAxis, characterData.bodyRotation);
 
-                } else if (Vector3.Dot(characterData.playerData.inputDir, characterData.avatarLookForward) < -.2f) {
-                    characterData.bodyRotation = Quaternion.Euler(-characterData.avatarLookRight * angle1) * characterData.bodyRotation;
-                    characterData.bodyRotation = AlignBallRotation(-characterData.avatarLookRight, characterData.bodyRotation);
+                } else if (Vector3.Dot(characterData.playerData.wishMove, characterData.avatarLookForward) < -.5f) {
+                    characterData.bodyRotation = Quaternion.Euler(-rotationAxis * angle1) * characterData.bodyRotation;
+                    characterData.bodyRotation = AlignBallRotation(rotationAxis, characterData.bodyRotation);
 
                 }
 

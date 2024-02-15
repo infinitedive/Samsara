@@ -23,19 +23,29 @@ namespace Game.StateMachine
     public override void UpdateState()
     {
 
-        if (ctx.timerController.ignoreGravityTimer > 0f || ctx.characterData.playerData.hovering || ctx.timerController.jumpTimer > 0f) { } 
-        else if (ctx.timerController.reduceGravityTimer > 0f) {
-            ctx.characterData.moveData.velocity.y -= (ctx.characterData.moveConfig.gravity * Time.deltaTime * (1f - ctx.timerController.reduceGravityTimer));
-        } else if (!ctx.characterData.playerData.grappling) {
-            ctx.characterData.moveData.velocity.y -= (ctx.characterData.moveConfig.gravity * Time.deltaTime);
-            // Debug.Log(ctx.moveConfig.gravity * Time.deltaTime);
+        if (ctx.timerController.ignoreGravityTimer > 0f || ctx.characterData.playerData.detectWall || currentSubState.name == "burst") {  } 
+        else  {
+            ctx.characterData.moveData.velocity.y -= (ctx.characterData.moveConfig.gravity * Time.deltaTime * 1f);
         }
+
+        Debug.Log(currentSubState.name);
+
 
 
         // AirMovement();
         OnlyAngularVelocity(ctx.characterData.playerData.wishMove, 1f);
 
         ctx.collisionHandler.CollisionCheck();
+
+        if (ctx.characterData.playerData.detectWall) {
+            ctx.characterData.moveData.velocity.y = Mathf.Lerp(ctx.characterData.moveData.velocity.y, 0f, Time.deltaTime * 8f);
+            // ctx.characterData.moveData.velocity.y = 0f;
+
+            if (ctx.characterData.playerData.wishJumpUp) {
+                Jump((2f * ctx.characterData.playerData.wallNormal + Vector3.up).normalized * 3f);
+            }
+        }
+
         CheckSwitchStates();
     }
 
