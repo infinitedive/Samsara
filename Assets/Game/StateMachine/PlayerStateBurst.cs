@@ -29,7 +29,7 @@ namespace Game.StateMachine
         public override void UpdateState() // duration
         {
 
-            ctx.characterData.moveData.velocity = Vector3.Lerp(ctx.characterData.moveData.velocity, ctx.characterData.moveData.velocity * 1.1f, Time.deltaTime * 8f);
+            ctx.characterData.moveData.velocity += (2f * (ctx.characterData.moveConfig.maxVelocity - ctx.characterData.moveData.velocity.magnitude)) * ctx.characterData.velocityForward * Time.deltaTime;
 
             if (true) {
 
@@ -43,12 +43,8 @@ namespace Game.StateMachine
                 SkateMovementUpdate(Mathf.Pow(3f, .5f));
             }
 
-            if (ctx.characterData.playerData.wishJumpDown) {
-
-                
-
-            } else if (ctx.characterData.playerData.wishJumpUp) {
-
+            if (ctx.characterData.playerData.bonusTime) {
+                time += 1f;
             }
 
             // if (ctx.playerData.wishFirePress) {

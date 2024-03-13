@@ -97,14 +97,14 @@ namespace Game.StateMachine {
             float forwardMove = ctx.characterData.playerData.verticalAxis;
             float rightMove = ctx.characterData.playerData.horizontalAxis;
 
-            Vector3 wishDir = (forwardMove * Vector3.forward + rightMove * Vector3.right).normalized;
+            Vector3 wishDir = forwardMove * Vector3.forward + rightMove * Vector3.right;
 
-            if (ctx.characterData.playerData.hovering) {
-                wishDir = (forwardMove * Vector3.up + rightMove * Vector3.right).normalized;
-            }
+            // if (ctx.characterData.playerData.hovering) {
+            //     wishDir = (forwardMove * Vector3.up + rightMove * Vector3.right).normalized;
+            // }
 
             avatarLookFlat = ctx.FlatLookRotation(ctx.characterData.avatarLookForward);
-            ctx.characterData.playerData.wishMove = ctx.characterData.avatarLookRotation * wishDir;
+            // ctx.characterData.playerData.wishMove = ctx.characterData.avatarLookRotation * wishDir;
             ctx.characterData.playerData.wishMove = avatarLookFlat * wishDir;
         }
 
@@ -172,7 +172,7 @@ namespace Game.StateMachine {
             Vector3 movement = ctx.characterData.playerData.wishMove * ctx.characterData.moveConfig.walkSpeed;
 
             
-                AccelerateTo(movement, 8f);
+            AccelerateTo(movement, 8f);
 
             
 
@@ -261,18 +261,16 @@ namespace Game.StateMachine {
 
         protected void AccelerateTo(Vector3 targetVelocity, float delta) {
 
-            Vector3 neutralMove = (avatarLookFlat * targetVelocity);
-
             if (ctx.characterData.moveData.velocity.magnitude > targetVelocity.magnitude) {
 
                 float yVel = ctx.characterData.moveData.velocity.y;
-                ctx.characterData.moveData.velocity = Vector3.Lerp(ctx.characterData.moveData.velocity, Vector3.ClampMagnitude(targetVelocity, ctx.characterData.moveData.velocity.magnitude), Time.deltaTime * 8f);
+                ctx.characterData.moveData.velocity = Vector3.Lerp(ctx.characterData.moveData.velocity, targetVelocity.normalized * ctx.characterData.moveData.velocity.magnitude, Time.deltaTime * delta);
                 ctx.characterData.moveData.velocity.y = yVel;
 
             } else {
 
                 float yVel = ctx.characterData.moveData.velocity.y;
-                ctx.characterData.moveData.velocity = Vector3.Lerp(ctx.characterData.moveData.velocity, targetVelocity, Time.deltaTime * 8f);
+                ctx.characterData.moveData.velocity = Vector3.Lerp(ctx.characterData.moveData.velocity, targetVelocity, Time.deltaTime * delta);
                 ctx.characterData.moveData.velocity.y = yVel;
             }
 

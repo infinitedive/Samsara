@@ -41,8 +41,8 @@ namespace Game.StateMachine
             ctx.characterData.moveData.velocity -= ctx.characterData.playerData.wallNormal;
 
             if (ctx.characterData.playerData.wishJumpUp && ctx.timerController.wallTouchTimer <= 0f) {
-                Jump((ctx.characterData.playerData.wallNormal * 2f + Vector3.up).normalized * 1.5f);
-                ctx.timerController.wallTouchTimer = .2f;
+                Jump((ctx.characterData.playerData.wallNormal + Vector3.up).normalized * 1.5f);
+                ctx.timerController.wallTouchTimer = .5f;
             }
         }
 

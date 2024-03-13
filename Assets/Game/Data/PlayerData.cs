@@ -63,6 +63,7 @@ namespace Game.Data {
         public bool attacking = false;
         public bool grounded = false;
         public bool detectWall = false;
+        public bool bonusTime = false;
         public bool hovering = false;
 
         // Grapple

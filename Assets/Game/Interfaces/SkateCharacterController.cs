@@ -28,15 +28,14 @@ namespace Game.Controllers {
         [HideInInspector] public CollisionHandler collisionHandler;
         [HideInInspector] public TargettingHandler targettingHandler;
     
-        // public Transform rightHandEffector;
         
-    
+        // Unorganized member variables
+
         public Material cloakMat;
         [HideInInspector] public Vector3 preUpdateEnvironmentForces;
         [HideInInspector] public Vector3 squash;
         public Text debug;
         [HideInInspector] public BezierCurve bezierCurve;
-        // [HideInInspector] public Quaternion bodyRotation { get { return transform.rotation; } set { transform.rotation = value; } }
         protected Vector3 prevPosition;
         [HideInInspector] public bool doubleJump = false;
         [HideInInspector] public GameObject slashObj;
@@ -97,7 +96,19 @@ namespace Game.Controllers {
     
         }
     
-        
+        private void Start() {
+            base.Start();
+
+            currentState = new PlayerStateAir(this, new PlayerStateFactory(this));
+            // currentState.OnRequestInstantiate += HandleInstantiation;
+            currentState.InitializeSubStates();
+            // bezierCurve = new BezierCurve(this);
+
+            characterData.moveData.origin = transform.position;
+            prevPosition = transform.position;
+
+
+        }
 
         private void Update () {
 
@@ -189,7 +200,7 @@ namespace Game.Controllers {
             characterData.playerData.wishDashPress = false;
             characterData.playerData.wishDashUp = false;
             characterData.playerData.detectWall = false;
-            characterData.playerData.wallNormal = Vector3.zero;
+            characterData.playerData.bonusTime = false;
 
             if (characterData.playerData.wishEscapeDown) {
                 Application.Quit();
@@ -200,19 +211,7 @@ namespace Game.Controllers {
 
         }
 
-        private void Start() {
-            base.Start();
-
-            currentState = new PlayerStateAir(this, new PlayerStateFactory(this));
-            // currentState.OnRequestInstantiate += HandleInstantiation;
-            currentState.InitializeSubStates();
-            // bezierCurve = new BezierCurve(this);
-
-            characterData.moveData.origin = transform.position;
-            prevPosition = transform.position;
-
-
-        }
+        
 
         public void HandleInstantiation()
         {

@@ -130,7 +130,7 @@ namespace Game.Controllers {
     
             CheckGrounded();
             
-            if (timerController.jumpTimer > 0f) return;
+            if (timerController.jumpTimer > 0f || timerController.wallTouchTimer > 0f) return;
     
             RaycastHit hit;
             if (Physics.Raycast(characterData.moveData.origin, transform.forward, out hit, 1.1f, groundMask)) {
@@ -173,6 +173,11 @@ namespace Game.Controllers {
             // characterData.playerData.detectWall = characterData.playerData.detectWall && timerController.wallTouchTimer <= 0f;
     
             if (characterData.playerData.detectWall) {
+
+                if (characterData.playerData.wallNormal == Vector3.zero) {
+                    characterData.playerData.bonusTime = true;
+                }
+
                 characterData.playerData.wallNormal = (leftSide + rightSide + backSide + frontSide).normalized;
             } else {
                 characterData.playerData.wallNormal = Vector3.zero;

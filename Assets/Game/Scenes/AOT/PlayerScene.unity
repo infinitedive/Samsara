@@ -5736,6 +5736,7 @@ MonoBehaviour:
   attacking: 0
   grounded: 0
   detectWall: 0
+  bonusTime: 0
   hovering: 0
   grapplePoint: {x: 0, y: 0, z: 0}
   joint: {fileID: 0}
@@ -5900,8 +5901,8 @@ MonoBehaviour:
   gravity: 10
   jumpForce: 12
   boostForce: 10
-  maxVelocity: 40
-  terminalVelocity: 40
+  maxVelocity: 30
+  terminalVelocity: 30
   flyMode: 0
   walkSpeed: 15
   runSpeed: 25
