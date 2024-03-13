@@ -35,6 +35,7 @@
 *.prefab
 *.png
 *.jpg
+*.txt
 
 Assets/.vs*
 
