@@ -110,6 +110,8 @@ namespace Game.Controllers {
             characterData.framingCam.m_XDamping = Mathf.Lerp(characterData.framingCam.m_XDamping, 1f, Time.deltaTime * 4f);
             characterData.framingCam.m_YDamping = Mathf.Lerp(characterData.framingCam.m_YDamping, 1f, Time.deltaTime * 4f);
             characterData.framingCam.m_ZDamping = Mathf.Lerp(characterData.framingCam.m_ZDamping, 0f, Time.deltaTime * 4f);
+
+            characterData.thirdPersonCam.m_Lens.Dutch = Mathf.Lerp(characterData.thirdPersonCam.m_Lens.Dutch, -Vector3.Dot(characterData.moveData.velocity/characterData.moveConfig.walkSpeed, characterData.avatarLookRight) * 5f, Time.deltaTime * 8f);
             
             
             //focusAimBlend = Mathf.Lerp(focusAimBlend, .5f, Time.deltaTime * 8f);

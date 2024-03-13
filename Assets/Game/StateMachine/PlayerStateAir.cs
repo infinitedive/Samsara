@@ -35,7 +35,7 @@ namespace Game.StateMachine
         ctx.collisionHandler.CollisionCheck();
 
         if (ctx.characterData.playerData.detectWall) {
-            ctx.characterData.moveData.velocity.y = Mathf.Lerp(ctx.characterData.moveData.velocity.y, 0f, Time.deltaTime * 10f);
+            ctx.characterData.moveData.velocity.y = 0f;
             // ctx.characterData.moveData.velocity.y = 0f;
 
             ctx.characterData.moveData.velocity -= ctx.characterData.playerData.wallNormal;
