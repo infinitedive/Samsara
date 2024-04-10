@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 using UnityEngine.Rendering;
 
@@ -6,7 +7,7 @@ using Game.Data;
 using Game.StateMachine;
 
 namespace Game.Controllers {
-    public class CollisionHandler : MonoBehaviour
+    public class CollisionController : MonoBehaviour
     {
 
         public static int groundLayerMask;
@@ -25,8 +26,11 @@ namespace Game.Controllers {
         public Vector3 rightSide;
         public Vector3 backSide;
         public Vector3 groundNormal = Vector3.up;
+        public event Action<int> OnCollisionEnterEvent;
+        public event Action<int> OnCollisionStayEvent;
+        public event Action<GameObject> OnCollisionExitEvent;
 
-                public static void GetCapsulePoints(CapsuleCollider capc, Vector3 origin, out Vector3 p1, out Vector3 p2) {
+        public static void GetCapsulePoints(CapsuleCollider capc, Vector3 origin, out Vector3 p1, out Vector3 p2) {
 
             var distanceToPoints = capc.height / 2f - capc.radius;
             p1 = origin + capc.center + Vector3.up * distanceToPoints;
@@ -34,44 +38,18 @@ namespace Game.Controllers {
 
         }
 
-        public static void PrivateResolveCollisions (Collider collider, ref Vector3 origin, ref Vector3 velocity, int layerMask) {
-        
-            // manual collision resolving
-            int numOverlaps = 0;
-            if (collider is CapsuleCollider) {
-
-                var capc = collider as CapsuleCollider;
-
-                Vector3 point1, point2;
-                GetCapsulePoints (capc, origin, out point1, out point2);
-
-                numOverlaps = Physics.OverlapCapsuleNonAlloc (point1, point2, capc.radius,
-                    _colliders, layerMask, QueryTriggerInteraction.Ignore);
-
-            } else if (collider is BoxCollider) {
-
-                numOverlaps = Physics.OverlapBoxNonAlloc (origin, collider.bounds.extents, _colliders,
-                    Quaternion.identity, layerMask, QueryTriggerInteraction.Ignore);
-
-            } else if (collider is SphereCollider) {
-
-                var caps = collider as SphereCollider;
-
-                numOverlaps = Physics.OverlapSphereNonAlloc (origin, caps.radius, _colliders,
-                    layerMask, QueryTriggerInteraction.Ignore);
-
-            }
+        private void ResolvePenetration(int numOverlaps) {
 
             for (int i = 0; i < numOverlaps; i++) {
 
                 Vector3 direction;
                 float distance;
 
-                if (Physics.ComputePenetration (collider, origin,
+                if (Physics.ComputePenetration (playerCollider, characterData.moveData.origin,
                     Quaternion.identity, _colliders [i], _colliders [i].transform.position,
                     _colliders [i].transform.rotation, out direction, out distance)) {
 
-                    if (velocity == Vector3.zero) {
+                    if (characterData.moveData.velocity == Vector3.zero) {
                         return;
                     }
 
@@ -79,23 +57,56 @@ namespace Game.Controllers {
                         return;
                     }
 
-                    // Debug.Log(velocity);
+                    // Debug.Log(characterData.moveData.velocity);
                     direction.Normalize();
 
-                    velocity += Vector3.Dot(velocity, -direction) * direction;
+                    characterData.moveData.velocity += Vector3.Dot(characterData.moveData.velocity, -direction) * direction;
 
                     float isSide = Mathf.Abs(Vector3.Dot(direction, Vector3.up));
 
                     // Handle collision
                     // Vector3 penetrationVector = direction * (distance + .5f * isSide);
                     Vector3 penetrationVector = direction * (distance);
-                    origin += penetrationVector;
+                    characterData.moveData.origin += penetrationVector;
 
-                    // velocity += planeForward;
+                    // characterData.moveData.velocity += planeForward;
 
 
                 }
             }
+
+        }
+
+        public void PrivateResolveCollisions () {
+        
+            // manual collision resolving
+            int numOverlaps = 0;
+            if (playerCollider is CapsuleCollider) {
+
+                var capc = playerCollider as CapsuleCollider;
+
+                Vector3 point1, point2;
+                GetCapsulePoints (capc, characterData.moveData.origin, out point1, out point2);
+
+                numOverlaps = Physics.OverlapCapsuleNonAlloc (point1, point2, capc.radius,
+                    _colliders, groundLayerMask, QueryTriggerInteraction.Ignore);
+
+            }
+            // else if (characterData.playerCollider is BoxCollider) {
+
+            //     numOverlaps = Physics.OverlapBoxNonAlloc (characterData.moveData.origin, characterData.playerCollider.bounds.extents, _colliders,
+            //         Quaternion.identity, layerMask, QueryTriggerInteraction.Ignore);
+
+            // } else if (characterData.playerCollider is SphereCollider) {
+
+            //     var caps = characterData.playerCollider as SphereCollider;
+
+            //     numOverlaps = Physics.OverlapSphereNonAlloc (characterData.moveData.origin, caps.radius, _colliders,
+            //         layerMask, QueryTriggerInteraction.Ignore);
+
+            // }
+
+            ResolvePenetration(numOverlaps);
         }
 
 
@@ -103,10 +114,10 @@ namespace Game.Controllers {
 
             groundLayerMask = LayerMask.GetMask (new string[] { "Ground", "Player clip" }); //(1 << 0);
 
+            OnCollisionStayEvent += ResolvePenetration;
+
 
             characterData = GetComponent<CharacterData>();
-
-            playerCollider = transform.GetComponent<CapsuleCollider>();
 
             playerCollider = transform.GetComponent<CapsuleCollider>();
 
@@ -121,7 +132,7 @@ namespace Game.Controllers {
 
         public void ResolveCollisions() {
     
-            PrivateResolveCollisions(playerCollider, ref characterData.moveData.origin, ref characterData.moveData.velocity, LayerMask.GetMask (new string[] { "Ground" }));
+            PrivateResolveCollisions();
             characterData.moveData.origin += characterData.moveData.velocity * Time.deltaTime; // p = v * dt
     
         }

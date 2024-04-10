@@ -12,6 +12,8 @@ namespace Game.Controllers {
         public Vector3 viewTransformLookAt;
         private CharacterData characterData;
         public Vector3 cameraShift = Vector3.zero;
+
+        public Action<Vector3> OnCameraWhip;
         
 
         private void Awake() {
@@ -20,9 +22,31 @@ namespace Game.Controllers {
 
         }
 
+        public void SwitchFirstPerson() {
+            characterData.firstPersonCam.Priority = 1;
+            characterData.thirdPersonCam.Priority = 0;
+
+        }
+
+        public void SwitchThirdPerson() {
+            characterData.firstPersonCam.Priority = 0;
+            characterData.thirdPersonCam.Priority = 1;
+
+
+        }
+
         public void CameraSettings() { // TODO:
 
             characterData.framingCam.m_UnlimitedSoftZone = false;
+
+            if (characterData.firstPersonCam.Priority == 1) {
+                // characterData.avatarLookRotation = combinedLookRotation;
+                // characterData.bodyRotation = FlatLookRotation(characterData.avatarLookForward);
+            } else {
+
+                // characterData.bodyRotation = Quaternion.Slerp(characterData.bodyRotation, FlatLookRotation(characterData.viewForward), Time.deltaTime * 5f);
+                
+            }
 
             // if (characterData.playerData.detectWall && characterData.firstPersonCam.Priority != 1) {
             //     characterData.framingCam.m_ScreenX = Mathf.Lerp(characterData.framingCam.m_ScreenX, 0.5f + Vector3.Dot(characterData.playerData.wallNormal, -characterData.viewRight) / 3f, Time.deltaTime * 2f);
@@ -111,7 +135,7 @@ namespace Game.Controllers {
             characterData.framingCam.m_YDamping = Mathf.Lerp(characterData.framingCam.m_YDamping, 1f, Time.deltaTime * 4f);
             characterData.framingCam.m_ZDamping = Mathf.Lerp(characterData.framingCam.m_ZDamping, 0f, Time.deltaTime * 4f);
 
-            characterData.thirdPersonCam.m_Lens.Dutch = Mathf.Lerp(characterData.thirdPersonCam.m_Lens.Dutch, -Vector3.Dot(characterData.moveData.velocity/characterData.moveConfig.walkSpeed, characterData.avatarLookRight) * 5f, Time.deltaTime * 8f);
+            // characterData.thirdPersonCam.m_Lens.Dutch = Mathf.Lerp(characterData.thirdPersonCam.m_Lens.Dutch, -Vector3.Dot(characterData.moveData.velocity/characterData.moveConfig.walkSpeed, characterData.avatarLookRight) * 5f, Time.deltaTime * 8f);
             
             
             //focusAimBlend = Mathf.Lerp(focusAimBlend, .5f, Time.deltaTime * 8f);

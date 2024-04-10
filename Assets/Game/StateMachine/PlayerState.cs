@@ -7,6 +7,8 @@ namespace Game.StateMachine {
 
     public abstract class PlayerState
     {
+
+        protected GearController gearController;
         protected bool _isRootState = false;
         protected bool _isTransitionState = false;
         protected SkateCharacterController _ctx;
@@ -171,12 +173,16 @@ namespace Game.StateMachine {
 
             Vector3 movement = ctx.characterData.playerData.wishMove * ctx.characterData.moveConfig.walkSpeed;
 
-            
-            AccelerateTo(movement, 8f);
+            if (ctx.characterData.playerData.grounded) {
+                ctx.characterData.playerData.turnResponse = Mathf.Lerp(ctx.characterData.playerData.turnResponse, 8f, Time.deltaTime * 2f);
+            } else {
+                ctx.characterData.playerData.turnResponse = Mathf.Lerp(ctx.characterData.playerData.turnResponse, 1f, Time.deltaTime * 2f);
+            }
+
+            SlerpMovement(movement, ctx.characterData.playerData.turnResponse);
 
             
-
-
+            
         }
 
         protected void SkateMovementUpdate(float power) {
@@ -259,7 +265,24 @@ namespace Game.StateMachine {
             
         }
 
-        protected void AccelerateTo(Vector3 targetVelocity, float delta) {
+        protected void SlerpMovement(Vector3 targetVelocity, float delta) {
+
+            if (ctx.characterData.moveData.velocity.magnitude > targetVelocity.magnitude) {
+
+                float yVel = ctx.characterData.moveData.velocity.y;
+                ctx.characterData.moveData.velocity = Vector3.Slerp(ctx.characterData.moveData.velocity, targetVelocity.normalized * ctx.characterData.moveData.velocity.magnitude, Time.deltaTime * delta);
+                ctx.characterData.moveData.velocity.y = yVel;
+
+            } else {
+
+                float yVel = ctx.characterData.moveData.velocity.y;
+                ctx.characterData.moveData.velocity = Vector3.Slerp(ctx.characterData.moveData.velocity, targetVelocity, Time.deltaTime * delta);
+                ctx.characterData.moveData.velocity.y = yVel;
+            }
+
+        }
+
+        protected void LerpMovement(Vector3 targetVelocity, float delta) {
 
             if (ctx.characterData.moveData.velocity.magnitude > targetVelocity.magnitude) {
 
@@ -273,7 +296,6 @@ namespace Game.StateMachine {
                 ctx.characterData.moveData.velocity = Vector3.Lerp(ctx.characterData.moveData.velocity, targetVelocity, Time.deltaTime * delta);
                 ctx.characterData.moveData.velocity.y = yVel;
             }
-
 
         }
 

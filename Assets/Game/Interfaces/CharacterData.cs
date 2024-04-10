@@ -17,7 +17,8 @@ namespace Game.Data {
 
         [HideInInspector] public Vector3 lastContactRight = Vector3.up;
         [HideInInspector] public Vector3 lastSteepRight = Vector3.up;
-
+        
+        [HideInInspector] public int gear;
         [HideInInspector] public float zVel;
         [HideInInspector] public float xVel;
         [HideInInspector] public float yVel;

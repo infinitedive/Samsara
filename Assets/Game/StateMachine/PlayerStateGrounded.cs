@@ -39,7 +39,7 @@ namespace Game.StateMachine
                 Jump();
             }
 
-            ctx.collisionHandler.CollisionCheck();
+            ctx.collisionController.CollisionCheck();
 
             
 

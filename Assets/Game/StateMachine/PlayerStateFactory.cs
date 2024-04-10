@@ -9,6 +9,7 @@ namespace Game.StateMachine {
             air,
             grounded,
             grapple,
+            grappleHang,
             melee,
             lunge,
             noop,
@@ -28,6 +29,7 @@ namespace Game.StateMachine {
             _states[State.air] = new PlayerStateAir(_context, this);
             _states[State.grounded] = new PlayerStateGrounded(_context, this);
             _states[State.grapple] = new PlayerStateGrapple(_context, this);
+            _states[State.grapple] = new PlayerStateGrappleHang(_context, this);
             _states[State.burst] = new PlayerStateBurst(_context, this);
             _states[State.clutch] = new PlayerStateClutch(_context, this);
     
@@ -56,6 +58,10 @@ namespace Game.StateMachine {
     
         public PlayerState Grapple() {
             return _states[State.grapple];
+        }
+
+        public PlayerState GrappleHang() {
+            return _states[State.grappleHang];
         }
 
         public PlayerState Clutch() {

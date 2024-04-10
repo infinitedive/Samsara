@@ -27,6 +27,7 @@ namespace Game.Data {
         public bool aimDown;
         public bool switchWeapon;
         public bool superJump;
+        public float turnResponse;
 
         // Input
         

@@ -12,7 +12,7 @@ namespace Game.Controllers {
     public class SkateCharacterController : BaseCharacterController
     {
 
-        
+        public event Action OnGrapple;
 
         
 
@@ -20,13 +20,12 @@ namespace Game.Controllers {
         // public virtual void HandleKnockback(PlayerCharacter target, Vector3 direction, float knockbackAmount){}
         // public virtual void HandleStagger(PlayerCharacter target, float duration){}
 
-        [HideInInspector] public InputController inputController;
         [HideInInspector] public VFXController vfxController;
         [HideInInspector] public CameraController cameraController;
         [HideInInspector] public TimerController timerController;
         [HideInInspector] public AnimationController animationController;
-        [HideInInspector] public CollisionHandler collisionHandler;
-        [HideInInspector] public TargettingHandler targettingHandler;
+        [HideInInspector] public CollisionController collisionController;
+        [HideInInspector] public TargettingController targettingController;
     
         
         // Unorganized member variables
@@ -53,7 +52,7 @@ namespace Game.Controllers {
     
         protected void Awake() {
 
-    
+            OnGrapple += HandleGrapple;
             
             // animationController.animator = transform.GetChild(0).GetComponent<Animator>();
             slashObj = transform.GetChild(1).transform.GetChild(1).gameObject;
@@ -78,8 +77,8 @@ namespace Game.Controllers {
             vfxController = GetComponent<VFXController>();
             animationController = GetComponent<AnimationController>();
             cameraController = GetComponent<CameraController>();
-            collisionHandler = GetComponent<CollisionHandler>();
-            targettingHandler = GetComponent<TargettingHandler>();
+            collisionController = GetComponent<CollisionController>();
+            targettingController = GetComponent<TargettingController>();
 
     
             characterData.playerControls = new PlayerControls();
@@ -110,6 +109,10 @@ namespace Game.Controllers {
 
         }
 
+        private void HandleGrapple() {
+
+        }
+
         private void Update () {
 
             // debug.text = String.Format("Aim Assist Blend: {0}\nCurrent Super State: {1}\nCurrent Sub State: {2}\nSpeed: {3}\nTargets: {4}", focusAimBlend, currentState?.name, currentState?.currentSubState?.name, Mathf.Floor(characterData.moveData.velocity.magnitude), targettingHandler.targetLength);
@@ -118,27 +121,21 @@ namespace Game.Controllers {
             // Check Ground For State >> Update position >> Resolve Collisions >> Update Next State >> Update Next Rotation
 
             timerController.DecrementTimers();
-            targettingHandler.FindTargets();
-            collisionHandler.ResolveCollisions();
+            // targettingController.FindTargets();
+            collisionController.ResolveCollisions();
 
             Vector3 positionalMovement = transform.position - prevPosition; // TODO: 
             transform.position = prevPosition;
             characterData.moveData.origin += positionalMovement;
 
             ClampVelocity();
-            // animationController.DoBlendAnimations();
-            CheckGrapplePress();
+            animationController.HandleAnimations();
+            HandleGrapplePress();
             cameraController.CameraSettings();
 
             // Dive should be renamed to Skate
             
             currentState.UpdateStates();
-
-            float x, y, z;
-
-            x = Mathf.Abs(characterData.moveData.velocity.normalized.x) * 2f;
-            y = Mathf.Abs(characterData.moveData.velocity.normalized.y) * 2f;
-            z = 2f + characterData.moveData.velocity.magnitude / 5f;
 
             if (preUpdateEnvironmentForces != Vector3.zero) {
                 characterData.moveData.velocity += preUpdateEnvironmentForces;
@@ -163,9 +160,9 @@ namespace Game.Controllers {
 
             // rightHandEffector.position = transform.position + avatarLookRight * .5f;
 
-            targettingHandler.AimAssist();
+            targettingController.AimAssist();
 
-            TransformRotation();
+            StepTransformRotation();
 
             // adjustment.z = playerInput.z * speed - Vector3.Dot(relativeVelocity, zAxis);
             // velocity += xAxis * adjustment.x + zAxis * adjustment.z;
@@ -173,19 +170,8 @@ namespace Game.Controllers {
             characterData.zVel = Vector3.Dot(characterData.moveData.velocity, characterData.bodyForward);
             characterData.yVel = Vector3.Dot(characterData.moveData.velocity, characterData.bodyUp);
 
-            Vector3 speedBallSquash = Vector3.zero;
 
             if (characterData.moveData.velocity != Vector3.zero) speedBall.transform.forward = characterData.moveData.velocity.normalized;
-    
-            speedBallSquash = speedBall.transform.InverseTransformVector(squash); // squash direction in local
-
-            // if (speedBallSquash != Vector3.zero) Debug.Log(speedBallSquash);
-
-            squash = Vector3.Lerp(squash, Vector3.zero, Time.deltaTime / 8f);
-
-            float squashY = Vector3.Dot(speedBallSquash, Vector3.up) / 2f;
-
-            speedBall.transform.localScale = Vector3.Lerp(speedBall.transform.localScale, new Vector3(2f, 2f - squashY, z), Time.deltaTime * 8f);
 
             characterData.playerData.wishJumpUp = false;
             characterData.playerData.wishJumpPress = false;
@@ -241,98 +227,134 @@ namespace Game.Controllers {
             }
         }
 
+        public void HandleCharacterRotation() {
 
-        public void TransformRotation() { // must handle here because both controllers used
+            Vector3 combinedLookPosition = characterData.lookAtThis.position;
+            Quaternion combinedLookRotation = Quaternion.LookRotation((combinedLookPosition - characterData.avatarLookTransform.position).normalized, Vector3.up);
+
+            if (characterData.moveData.velocity.magnitude > characterData.moveConfig.walkSpeed) { // TODO: make bodyTransform not this transform
+                characterData.avatarLookRotation = Quaternion.Slerp(characterData.avatarLookRotation, combinedLookRotation, Time.deltaTime * 20f);
+                characterData.bodyRotation = Quaternion.Slerp(characterData.bodyRotation, FlatLookRotation(characterData.viewForward), Time.deltaTime * 5f);
+                characterData.velocityRotation = Quaternion.LookRotation(characterData.moveData.velocity);
+            } else {
+                characterData.avatarLookRotation = Quaternion.Slerp(characterData.avatarLookRotation, combinedLookRotation, Time.deltaTime * 20f);
+                characterData.bodyRotation = Quaternion.Slerp(characterData.bodyRotation, FlatLookRotation(characterData.viewForward), Time.deltaTime * 5f);
+                characterData.velocityRotation = characterData.bodyRotation;
+            }
+
+        }
+
+        private void Balls() {
+
+            float distance = (characterData.moveData.velocity * Time.deltaTime).magnitude;
+            float angle1 = distance * (180f / Mathf.PI);
+            float ballAlignSpeed = 180f;
+
+            Quaternion AlignBallRotation (Vector3 rotationAxis, Quaternion rotation) {
+                Vector3 ballAxis = characterData.bodyUp;
+                float dot = Mathf.Clamp(Vector3.Dot(ballAxis, rotationAxis), -1f, 1f);
+                float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
+                float maxAngle = ballAlignSpeed * Time.deltaTime;
+
+                Quaternion newAlignment =
+                    Quaternion.FromToRotation(ballAxis, rotationAxis) * rotation;
+                if (angle <= maxAngle) {
+                    return newAlignment;
+                }
+                else {
+                    return Quaternion.SlerpUnclamped(
+                        rotation, newAlignment, maxAngle / angle
+                    );
+                }
+            }
+
+            Vector3 rotationAxis = Vector3.Cross(Vector3.up, characterData.moveData.velocity.normalized);
+
+            if (characterData.playerData.detectWall) {
+
+                if (characterData.playerData.wallNormal != Vector3.zero) {
+                    rotationAxis = Vector3.Cross(characterData.playerData.wallNormal, characterData.moveData.velocity.normalized);
+                }
+            }
+
+            characterData.bodyRotation = Quaternion.Euler(rotationAxis * angle1) * characterData.bodyRotation;
+            characterData.bodyRotation = AlignBallRotation(rotationAxis, characterData.bodyRotation);
+
+        }
+
+        private void HandleLookChanged() {
+            if (characterData.playerData.wishFireDown && characterData.playerData.mainTarget.position != Vector3.zero) { // hard lock on
+
+                toTarget = targettingController.reticle.anchoredPosition.normalized;
+
+                characterData.xMouseMovement += toTarget.x;
+                characterData.yMouseMovement += toTarget.y;
+
+                characterData.xMouseMovement = Mathf.Clamp(characterData.xMouseMovement, -2f, 2f);
+                characterData.yMouseMovement = Mathf.Clamp(characterData.yMouseMovement, -2f, 2f);
+                
+                characterData.viewTransformLook.x = Mathf.Clamp(characterData.viewTransformLook.x + characterData.yMouseMovement, characterData.moveConfig.minYRotation, characterData.moveConfig.maxYRotation);
+                characterData.viewTransformLook.y = characterData.viewTransformLook.y + characterData.xMouseMovement;
+
+                Vector3 influence = characterData.avatarLookRotation * new Vector3(Mathf.Clamp(characterData.xMouseMovement, -5f, 5f), Mathf.Clamp(-characterData.yMouseMovement, -5f, 5f), 0f);
+
+                characterData.viewRotation = 
+                    Quaternion.AngleAxis(characterData.viewTransformLook.y, Vector3.up) *
+                    Quaternion.AngleAxis(characterData.viewTransformLook.z, Vector3.forward) *
+                    Quaternion.AngleAxis(characterData.viewTransformLook.x, Vector3.right);
+
+                Vector3 vanishingPoint = characterData.cam.transform.position + characterData.cam.transform.forward * 20f;
+
+                characterData.lookAtThis.position += (characterData.playerData.mainTarget.position - characterData.lookAtThis.position + influence) * Time.deltaTime * 5f;
+
+            } else {
+
+                characterData.viewTransformLook.x = Mathf.Clamp(characterData.viewTransformLook.x + characterData.yMouseMovement, characterData.moveConfig.minYRotation, characterData.moveConfig.maxYRotation);
+                characterData.viewTransformLook.y = characterData.viewTransformLook.y + characterData.xMouseMovement;
+
+                characterData.viewRotation = 
+                    Quaternion.AngleAxis(characterData.viewTransformLook.y, Vector3.up) *
+                    Quaternion.AngleAxis(characterData.viewTransformLook.z, Vector3.forward) *
+                    Quaternion.AngleAxis(characterData.viewTransformLook.x, Vector3.right);
+
+                Vector3 vanishingPoint = characterData.avatarLookTransform.position + characterData.viewForward* 20f;
+
+                characterData.lookAtThis.position = vanishingPoint;
+
+            }
+        }
+
+        private void LookDamp() {
+            if (characterData.firstPersonCam.Priority == 1) {
+                characterData.playerData.xAimDamp = Mathf.Lerp(characterData.playerData.xAimDamp, .5f, Time.deltaTime * 2f);
+                characterData.playerData.yAimDamp = Mathf.Lerp(characterData.playerData.xAimDamp, .5f, Time.deltaTime * 2f);
+            } else {
+                characterData.playerData.xAimDamp = Mathf.Lerp(characterData.playerData.xAimDamp, .9f, Time.deltaTime * 2f);
+                characterData.playerData.yAimDamp = Mathf.Lerp(characterData.playerData.yAimDamp, .9f, Time.deltaTime * 2f);
+            }
+
+            characterData.xMouseMovement = Mathf.Clamp(characterData.playerData.mouseDelta.x * characterData.moveConfig.horizontalSensitivity * characterData.moveConfig.sensitivityMultiplier * characterData.playerData.xAimDamp, -2.5f, 2.5f);
+            characterData.yMouseMovement = Mathf.Clamp(-characterData.playerData.mouseDelta.y * characterData.moveConfig.verticalSensitivity  * characterData.moveConfig.sensitivityMultiplier * characterData.playerData.yAimDamp, -2.5f, 2.5f);
+
+        }
+
+
+        public void StepTransformRotation() { // must handle here because both controllers used
 
                 // AimAssist();
 
                 // characterData.focusOnThis.position = Vector3.Lerp(characterData.focusOnThis.position, characterData.playerData.focusPoint, Time.deltaTime * 10f);
                 
-                Vector3 combinedLookPosition = characterData.lookAtThis.position;
-                Quaternion combinedLookRotation = Quaternion.LookRotation((combinedLookPosition - characterData.avatarLookTransform.position).normalized, Vector3.up);
+                HandleCharacterRotation();
 
-                if (characterData.moveData.velocity.magnitude > characterData.moveConfig.walkSpeed) { // TODO: make bodyTransform not this transform
-                    characterData.avatarLookRotation = Quaternion.Slerp(characterData.avatarLookRotation, combinedLookRotation, Time.deltaTime * 20f);
-                    // characterData.avatarLookRotation = combinedLookRotation;
-                    // characterData.bodyRotation = Quaternion.Slerp(characterData.bodyRotation, FlatLookRotation(characterData.viewForward), Time.deltaTime * 5f);
-                    characterData.velocityRotation = Quaternion.LookRotation(characterData.moveData.velocity);
-                } else {
-                    characterData.avatarLookRotation = Quaternion.Slerp(characterData.avatarLookRotation, combinedLookRotation, Time.deltaTime * 20f);
-                    // characterData.avatarLookRotation = combinedLookRotation;
-                    if (characterData.firstPersonCam.Priority == 1) {
-                        // characterData.avatarLookRotation = combinedLookRotation;
-                        // characterData.bodyRotation = FlatLookRotation(characterData.avatarLookForward);
-                    } else {
-
-                        // characterData.bodyRotation = Quaternion.Slerp(characterData.bodyRotation, FlatLookRotation(characterData.viewForward), Time.deltaTime * 5f);
-                        
-                    }
-                    characterData.velocityRotation = characterData.bodyRotation;
-                }
-
-                float distance = (characterData.moveData.velocity * Time.deltaTime).magnitude;
-                float angle1 = distance * (180f / Mathf.PI);
-                float ballAlignSpeed = 180f;
-
-                Quaternion AlignBallRotation (Vector3 rotationAxis, Quaternion rotation) {
-                    Vector3 ballAxis = characterData.bodyUp;
-                    float dot = Mathf.Clamp(Vector3.Dot(ballAxis, rotationAxis), -1f, 1f);
-                    float angle = Mathf.Acos(dot) * Mathf.Rad2Deg;
-                    float maxAngle = ballAlignSpeed * Time.deltaTime;
-
-                    Quaternion newAlignment =
-                        Quaternion.FromToRotation(ballAxis, rotationAxis) * rotation;
-                    if (angle <= maxAngle) {
-                        return newAlignment;
-                    }
-                    else {
-                        return Quaternion.SlerpUnclamped(
-                            rotation, newAlignment, maxAngle / angle
-                        );
-                    }
-                }
-
-                Vector3 rotationAxis = Vector3.Cross(Vector3.up, characterData.moveData.velocity.normalized);
-
-                if (characterData.playerData.detectWall) {
-
-                    if (characterData.playerData.wallNormal != Vector3.zero) {
-                        rotationAxis = Vector3.Cross(characterData.playerData.wallNormal, characterData.moveData.velocity.normalized);
-                    }
-                }
-
-                // characterData.transform.localRotation = 
-                // if (Vector3.Dot(characterData.moveData.velocity.normalized, characterData.avatarLookForward) > .5f) {
-                    characterData.bodyRotation = Quaternion.Euler(rotationAxis * angle1) * characterData.bodyRotation;
-                    characterData.bodyRotation = AlignBallRotation(rotationAxis, characterData.bodyRotation);
-
-                // } else if (Vector3.Dot(characterData.moveData.velocity.normalized, characterData.avatarLookForward) < -.5f) {
-                //     characterData.bodyRotation = Quaternion.Euler(-rotationAxis * angle1) * characterData.bodyRotation;
-                //     characterData.bodyRotation = AlignBallRotation(rotationAxis, characterData.bodyRotation);
-
-                // }
-
-                // TODO: think about inverting velocity movement
+                // Balls();
 
                 // 28 46
 
                 // Vector2 differenceInPixels = cameraController.camera.WorldToScreenPoint(characterData.lookAtThis.position) - cameraController.camera.WorldToScreenPoint(characterData.playerData.focusPoint);
 
-                if (characterData.firstPersonCam.Priority == 1) {
-                    characterData.playerData.xAimDamp = Mathf.Lerp(characterData.playerData.xAimDamp, .5f, Time.deltaTime * 2f);
-                    characterData.playerData.yAimDamp = Mathf.Lerp(characterData.playerData.xAimDamp, .5f, Time.deltaTime * 2f);
-
-                    
-
-                } else {
-                    characterData.playerData.xAimDamp = Mathf.Lerp(characterData.playerData.xAimDamp, .9f, Time.deltaTime * 2f);
-                    characterData.playerData.yAimDamp = Mathf.Lerp(characterData.playerData.yAimDamp, .9f, Time.deltaTime * 2f);
-
-                }
-
-                characterData.xMouseMovement = Mathf.Clamp(characterData.playerData.mouseDelta.x * characterData.moveConfig.horizontalSensitivity * characterData.moveConfig.sensitivityMultiplier * characterData.playerData.xAimDamp, -2.5f, 2.5f);
-                characterData.yMouseMovement = Mathf.Clamp(-characterData.playerData.mouseDelta.y * characterData.moveConfig.verticalSensitivity  * characterData.moveConfig.sensitivityMultiplier * characterData.playerData.yAimDamp, -2.5f, 2.5f);
-
+                LookDamp();
+                
                 // aim influence / virtual mouse
 
                 // if (!(cameraController.camera.WorldToViewportPoint(playerData.mainTarget.position).z < 0f)) {
@@ -340,89 +362,50 @@ namespace Game.Controllers {
                 //     Vector3 toReticle = reticle.anchoredPosition.normalized;
 
                 // }
+                HandleFirstPerson();
+                HandleLookChanged();
                 
-                if (characterData.playerData.wishFireDown && characterData.playerData.mainTarget.position != Vector3.zero) { // hard lock on
+        }
 
-                    toTarget = targettingHandler.reticle.anchoredPosition.normalized;
+        private void HandleFirstPerson() {
+            if (characterData.playerData.wishAimDown) {
+                characterData.firstPersonCam.Priority = 1;
+                // virtualFramingCam.Priority = 0;
+                characterData.thirdPersonCam.Priority = 0;
 
-                    characterData.xMouseMovement += toTarget.x;
-                    characterData.yMouseMovement += toTarget.y;
+                vfxController.dither = Mathf.Lerp(vfxController.dither, 1f, Time.deltaTime * 4f);
 
-                    characterData.xMouseMovement = Mathf.Clamp(characterData.xMouseMovement, -2f, 2f);
-                    characterData.yMouseMovement = Mathf.Clamp(characterData.yMouseMovement, -2f, 2f);
-                    
-                    characterData.viewTransformLook.x = Mathf.Clamp(characterData.viewTransformLook.x + characterData.yMouseMovement, characterData.moveConfig.minYRotation, characterData.moveConfig.maxYRotation);
-                    characterData.viewTransformLook.y = characterData.viewTransformLook.y + characterData.xMouseMovement;
-
-                    Vector3 influence = characterData.avatarLookRotation * new Vector3(Mathf.Clamp(characterData.xMouseMovement, -5f, 5f), Mathf.Clamp(-characterData.yMouseMovement, -5f, 5f), 0f);
-
-                    
-                    characterData.viewRotation = 
-                        Quaternion.AngleAxis(characterData.viewTransformLook.y, Vector3.up) *
-                        Quaternion.AngleAxis(characterData.viewTransformLook.z, Vector3.forward) *
-                        Quaternion.AngleAxis(characterData.viewTransformLook.x, Vector3.right);
-
-                    Vector3 vanishingPoint = characterData.cam.transform.position + characterData.cam.transform.forward * 20f;
-
-                    characterData.lookAtThis.position += (characterData.playerData.mainTarget.position - characterData.lookAtThis.position + influence) * Time.deltaTime * 5f;
-
-                } else {
-
-                    characterData.viewTransformLook.x = Mathf.Clamp(characterData.viewTransformLook.x + characterData.yMouseMovement, characterData.moveConfig.minYRotation, characterData.moveConfig.maxYRotation);
-                    characterData.viewTransformLook.y = characterData.viewTransformLook.y + characterData.xMouseMovement;
-
-                    characterData.viewRotation = 
-                        Quaternion.AngleAxis(characterData.viewTransformLook.y, Vector3.up) *
-                        Quaternion.AngleAxis(characterData.viewTransformLook.z, Vector3.forward) *
-                        Quaternion.AngleAxis(characterData.viewTransformLook.x, Vector3.right);
-
-                    Vector3 vanishingPoint = characterData.avatarLookTransform.position + characterData.viewForward* 20f;
-
-                    characterData.lookAtThis.position = vanishingPoint;
-
+                for (int i = 0; i < characterData.characterMaterials.Length; i++) 
+                {
+                    characterData.characterMaterials[i].SetFloat("_dither", vfxController.dither);
                 }
 
-                // _vcam.SetActive(true);
+                Color color = cloakMat.color;
+                color.a = 0f;
+                cloakMat.color = Color.Lerp(cloakMat.color, color, Time.deltaTime * 2f);
 
-                if (characterData.playerData.wishAimDown) {
-                    characterData.firstPersonCam.Priority = 1;
-                    // virtualFramingCam.Priority = 0;
-                    characterData.thirdPersonCam.Priority = 0;
-
-                    vfxController.dither = Mathf.Lerp(vfxController.dither, 1f, Time.deltaTime * 4f);
-
-                    for (int i = 0; i < characterData.characterMaterials.Length; i++) 
-                    {
-                        characterData.characterMaterials[i].SetFloat("_dither", vfxController.dither);
-                    }
-
-                    Color color = cloakMat.color;
-                    color.a = 0f;
-                    cloakMat.color = Color.Lerp(cloakMat.color, color, Time.deltaTime * 2f);
-
-                    // cameraController.camera.cullingMask &= ~(1 << LayerMask.NameToLayer("FirstPersonCull"));
+                // cameraController.camera.cullingMask &= ~(1 << LayerMask.NameToLayer("FirstPersonCull"));
 
 
-                } else {
-                    characterData.firstPersonCam.Priority = 0;
-                    // virtualFramingCam.Priority = 1;
-                    characterData.thirdPersonCam.Priority = 1;
+            } else {
+                characterData.firstPersonCam.Priority = 0;
+                // virtualFramingCam.Priority = 1;
+                characterData.thirdPersonCam.Priority = 1;
 
-                    vfxController.dither = Mathf.Lerp(vfxController.dither, 0f, Time.deltaTime * 4f);
+                vfxController.dither = Mathf.Lerp(vfxController.dither, 0f, Time.deltaTime * 4f);
 
-                    for (int i = 0; i < characterData.characterMaterials.Length; i++) 
-                    {
-                        characterData.characterMaterials[i].SetFloat("_dither", vfxController.dither);
-                    }
-
-                    Color color = cloakMat.color;
-                    color.a = 1f;
-                    cloakMat.color = Color.Lerp(cloakMat.color, color, Time.deltaTime * 2f);
-
-                    // cameraController.camera.cullingMask |= (1 << LayerMask.NameToLayer("FirstPersonCull"));
+                for (int i = 0; i < characterData.characterMaterials.Length; i++) 
+                {
+                    characterData.characterMaterials[i].SetFloat("_dither", vfxController.dither);
                 }
-                
+
+                Color color = cloakMat.color;
+                color.a = 1f;
+                cloakMat.color = Color.Lerp(cloakMat.color, color, Time.deltaTime * 2f);
+
+                // cameraController.camera.cullingMask |= (1 << LayerMask.NameToLayer("FirstPersonCull"));
             }
+        }
     
         IEnumerator<SkateCharacterController> FireballRoutine(Transform target) {
     
@@ -454,7 +437,7 @@ namespace Game.Controllers {
             characterData.playerData.grappleNormal = hit.normal;
         }
 
-        private void CheckGrapplePress() {
+        private void HandleGrapplePress() {
 
             if (characterData.playerData.wishGrapplePress && !characterData.playerData.grappling) {
                 ConnectGrapple(characterData.playerData.focusPoint);

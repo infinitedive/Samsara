@@ -5,31 +5,27 @@ namespace Game.StateMachine
 
 {
 
-    public class PlayerStateNeutral : PlayerState {
+    public class PlayerStateGrappleHang : PlayerState {
 
-        public PlayerStateNeutral(SkateCharacterController currentContext, PlayerStateFactory playerStateFactory) : base (currentContext, playerStateFactory) {
+        public PlayerStateGrappleHang(SkateCharacterController currentContext, PlayerStateFactory playerStateFactory) : base (currentContext, playerStateFactory) {
             _isRootState = false;
-            name = "neutral";
+            name = "grapplehang";
         }
 
         public override void EnterState() // action
         {
-            // oldMomentum = Vector3.Scale(ctx.playerData.velocity, new Vector3(1f, 0f, 1f));
-            // Debug.Log("ENTER NEUTRAL");
-            // Debug.Log(ctx.moveData.velocity);
-            time = 0f;
-            // gearController.GearOne();
+            
         }
 
         public override void UpdateState() // duration
         {
 
-            WalkMovementUpdate();
+            GrappleHang();
 
             CheckSwitchStates();
         }
 
-        private void NeutralMovement()
+        private void GrappleHang()
         {
 
             if (ctx.characterData.playerData.grounded) {
@@ -37,6 +33,13 @@ namespace Game.StateMachine
             } else {
 
             }
+
+
+            ctx.characterData.playerData.grappleDir = (ctx.characterData.playerData.grapplePoint - ctx.characterData.moveData.origin).normalized;
+
+            ctx.vfxController.GrappleVisuals();
+
+            CancelVelocityAgainst(ctx.characterData.playerData.grappleDir, 20f);
 
         }
 
@@ -52,9 +55,9 @@ namespace Game.StateMachine
 
         public override void CheckSwitchStates()
         {
-            if (ctx.characterData.playerData.wishDashPress && ctx.characterData.playerData.grounded) {
-                SwitchState(factory.Burst());
-            }
+            // if (ctx.characterData.playerData.wishDashPress && ctx.characterData.playerData.grounded) {
+            //     SwitchState(factory.Burst());
+            // }
 
             // if (ctx.playerData.wishFireDown) {
             //     SwitchState(factory.Lunge());

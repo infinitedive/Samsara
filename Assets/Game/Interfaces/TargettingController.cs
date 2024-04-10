@@ -6,7 +6,7 @@ using Game.Data;
 using Game.StateMachine;
 
 namespace Game.Controllers {
-    public class TargettingHandler : MonoBehaviour
+    public class TargettingController : MonoBehaviour
     {
 
         CharacterData characterData;

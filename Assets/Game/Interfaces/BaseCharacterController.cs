@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using System;
 
 using Game.StateMachine;
 using Game.Data;
@@ -14,6 +15,11 @@ namespace Game {
         [HideInInspector] public CharacterData characterData;
         [HideInInspector] public PlayerState _currentState;
         [HideInInspector] public PlayerState currentState { get {return _currentState; } set { _currentState = value; } }
+
+        public event Action<Vector3> OnKnockback;
+        public event Action<float> OnDamage;
+        public event Action OnPlayerDeath;
+        public event Action<GameObject> OnCollision;
     
         public void Start() {
 
@@ -22,6 +28,34 @@ namespace Game {
     
             // EntityManager entityManager = World.Active.EntityManager;
         
+            SubscribePlayerControls();
+            // SubscribeCollisionEvents();
+
+            OnPlayerDeath += HandlePlayerDeath;
+    
+            
+    
+        }
+
+        private void Die() {
+            OnPlayerDeath?.Invoke();
+        }
+
+        private void HandlePlayerDeath() {
+
+        }
+
+        private void ResolveCollision(GameObject other) {
+
+        }
+
+        private void SubscribeCollisionEvents() {
+
+            OnCollision += ResolveCollision;
+
+        }
+
+        private void SubscribePlayerControls() {
             characterData.playerControls.Player.Dash.started += context => {
                 characterData.playerData.wishDashDown = true;
                 characterData.playerData.wishDashPress = true;
@@ -161,8 +195,6 @@ namespace Game {
                 characterData.playerData.switchWeapon = context.ReadValue<bool>();
                 
             };
-    
-            
     
         }
     

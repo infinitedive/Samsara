@@ -32,7 +32,7 @@ namespace Game.StateMachine
         // AirMovement();
         // OnlyAngularVelocity(ctx.characterData.playerData.wishMove, 1f);
 
-        ctx.collisionHandler.CollisionCheck();
+        ctx.collisionController.CollisionCheck();
 
         if (ctx.characterData.playerData.detectWall) {
             ctx.characterData.moveData.velocity.y = 0f;

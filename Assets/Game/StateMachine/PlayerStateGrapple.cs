@@ -40,7 +40,7 @@ namespace Game.StateMachine {
 
     public override void InitializeSubStates() // 762416 36987
     {
-        SetSubState(factory.Noop());
+        SetSubState(factory.GrappleHang());
     }
 
     public override void CheckSwitchStates()

@@ -5,9 +5,9 @@ namespace Game.StateMachine
 
 {
 
-    public class PlayerStateNeutral : PlayerState {
+    public class PlayerStateFalling : PlayerState {
 
-        public PlayerStateNeutral(SkateCharacterController currentContext, PlayerStateFactory playerStateFactory) : base (currentContext, playerStateFactory) {
+        public PlayerStateFalling(SkateCharacterController currentContext, PlayerStateFactory playerStateFactory) : base (currentContext, playerStateFactory) {
             _isRootState = false;
             name = "neutral";
         }
@@ -18,26 +18,34 @@ namespace Game.StateMachine
             // Debug.Log("ENTER NEUTRAL");
             // Debug.Log(ctx.moveData.velocity);
             time = 0f;
-            // gearController.GearOne();
         }
 
         public override void UpdateState() // duration
         {
 
-            WalkMovementUpdate();
+            if (ctx.characterData.playerData.grounded && ctx.characterData.moveData.velocity.magnitude <= ctx.characterData.moveConfig.runSpeed) {
 
-            CheckSwitchStates();
-        }
+                WalkMovementUpdate();
 
-        private void NeutralMovement()
-        {
-
-            if (ctx.characterData.playerData.grounded) {
+                // if (ctx.playerData.wishDashUp) {
+                //     Dash();
+                // }
 
             } else {
+                SkateMovementUpdate(Mathf.Pow(3f, .5f));
+            }
+
+            if (ctx.characterData.playerData.wishJumpDown) {
+
+                
 
             }
 
+            // if (ctx.playerData.wishFirePress) {
+            //     ctx.TriggerThing();
+            // }
+
+            CheckSwitchStates();
         }
 
         public override void ExitState() // completion

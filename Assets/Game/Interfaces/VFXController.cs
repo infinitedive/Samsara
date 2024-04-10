@@ -63,6 +63,36 @@ namespace Game.Controllers {
 
         }
 
+        public void GrappleVisuals() {
+
+
+            _grappleArc.SetVector3("Pos0", characterData.moveData.origin + characterData.avatarLookForward);
+            _grappleArc.SetVector3("Pos1", Vector3.Lerp(characterData.moveData.origin, characterData.playerData.grapplePoint, .33f));
+            _grappleArc.SetVector3("Pos2", Vector3.Lerp(characterData.moveData.origin, characterData.playerData.grapplePoint, .66f));
+            _grappleArc.SetVector3("Pos3", characterData.playerData.grapplePoint);
+            _grappleArc.SetVector4("Color", characterData.moveConfig.grappleColor);
+
+            DrawRope();
+        }
+
+        public void DrawRope() {
+    
+            if (!characterData.playerData.grappling) return;
+    
+            var _lr = grappleGun.GetComponent<LineRenderer>();
+    
+            _lr.positionCount = 2;
+    
+            _lr.useWorldSpace = true;
+    
+            _lr.SetPosition(0, grappleGun.transform.position);
+            _lr.SetPosition(1, characterData.playerData.focusPoint);
+    
+            _lr.materials[0].mainTextureOffset += new Vector2(-Time.deltaTime, 0f);
+            
+            grappleArc.enabled = true;
+        }
+
         
 
         IEnumerator ActivateTrail(float timeActive) {

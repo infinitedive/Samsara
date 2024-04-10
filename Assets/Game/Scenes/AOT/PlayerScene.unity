@@ -563,6 +563,117 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
+--- !u!1 &400188488
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 400188489}
+  - component: {fileID: 400188491}
+  - component: {fileID: 400188490}
+  m_Layer: 14
+  m_Name: WindTrail
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &400188489
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 400188488}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.81, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2942721767938196375}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+--- !u!73398921 &400188490
+VFXRenderer:
+  serializedVersion: 1
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 400188488}
+  m_Enabled: 0
+  m_CastShadows: 1
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 0
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!2083052967 &400188491
+VisualEffect:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 400188488}
+  m_Enabled: 1
+  m_Asset: {fileID: 8926484042661614526, guid: 361b4f083ef72ea45b5ab374533366e7, type: 3}
+  m_InitialEventName: OnPlay
+  m_InitialEventNameOverriden: 1
+  m_StartSeed: 0
+  m_ResetSeedOnPlay: 1
+  m_AllowInstancing: 1
+  m_ResourceVersion: 1
+  m_PropertySheet:
+    m_Float:
+      m_Array: []
+    m_Vector2f:
+      m_Array: []
+    m_Vector3f:
+      m_Array: []
+    m_Vector4f:
+      m_Array: []
+    m_Uint:
+      m_Array: []
+    m_Int:
+      m_Array: []
+    m_Matrix4x4f:
+      m_Array: []
+    m_AnimationCurve:
+      m_Array: []
+    m_Gradient:
+      m_Array: []
+    m_NamedObject:
+      m_Array: []
+    m_Bool:
+      m_Array: []
 --- !u!1 &516957865
 GameObject:
   m_ObjectHideFlags: 0
@@ -995,7 +1106,7 @@ MonoBehaviour:
   priority: 0
   blendDistance: 0
   weight: 1
-  sharedProfile: {fileID: 11400000, guid: ed884f898e4c4da43ae40e1556abd141, type: 2}
+  sharedProfile: {fileID: 0}
 --- !u!23 &695916786
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1943,7 +2054,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1351314630
 Transform:
   m_ObjectHideFlags: 0
@@ -2506,13 +2617,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   abilities: []
   characterData: {fileID: 0}
-  inputController: {fileID: 0}
   vfxController: {fileID: 0}
   cameraController: {fileID: 0}
   timerController: {fileID: 0}
   animationController: {fileID: 0}
-  collisionHandler: {fileID: 0}
-  targettingHandler: {fileID: 0}
+  collisionController: {fileID: 0}
+  targettingController: {fileID: 0}
   cloakMat: {fileID: 2100000, guid: 23887b53fa780d645b947b7dff9fa7ee, type: 2}
   preUpdateEnvironmentForces: {x: 0, y: 0, z: 0}
   squash: {x: 0, y: 0, z: 0}
@@ -2597,6 +2707,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lastContactRight: {x: 0, y: 1, z: 0}
   lastSteepRight: {x: 0, y: 1, z: 0}
+  gear: 0
   zVel: 0
   xVel: 0
   yVel: 0
@@ -2623,7 +2734,7 @@ MonoBehaviour:
   brain: {fileID: 0}
   cam: {fileID: 1182034587}
   avatarLookTransform: {fileID: 2148349515315813434}
-  bodyTransform: {fileID: 1351314630}
+  bodyTransform: {fileID: 1160928218081037394}
   velocityRotation: {x: 0, y: 0, z: 0, w: 0}
   globalVolume: {fileID: 610416271}
   lookAtThis: {fileID: 8747447651476980945}
@@ -3833,7 +3944,7 @@ PrefabInstance:
     - target: {fileID: -1163788869198854193, guid: fbc801fedfea3cc45ab0a36dc5f42e22,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -1045565431576280480, guid: fbc801fedfea3cc45ab0a36dc5f42e22,
         type: 3}
@@ -4278,7 +4389,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: fbc801fedfea3cc45ab0a36dc5f42e22,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1262813355885905888, guid: fbc801fedfea3cc45ab0a36dc5f42e22,
         type: 3}
@@ -5707,6 +5818,7 @@ MonoBehaviour:
   aimDown: 0
   switchWeapon: 0
   superJump: 0
+  turnResponse: 0
   verticalAxis: 0
   horizontalAxis: 0
   wishMove: {x: 0, y: 0, z: 0}
@@ -5904,7 +6016,7 @@ MonoBehaviour:
   maxVelocity: 30
   terminalVelocity: 30
   flyMode: 0
-  walkSpeed: 15
+  walkSpeed: 5
   runSpeed: 25
   maxCharge: 2
   maxDistance: 100
@@ -6126,6 +6238,7 @@ Transform:
   - {fileID: 261389663568538396}
   - {fileID: 7709273889857948673}
   - {fileID: 1372652983989756723}
+  - {fileID: 400188489}
   m_Father: {fileID: 4004179484640766904}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &2971040172990666044
@@ -6335,7 +6448,7 @@ Animator:
   m_GameObject: {fileID: 1160928218081037403}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 6cd8c25cacb1d0046840529ec0df4702, type: 2}
-  m_Controller: {fileID: 9100000, guid: 2c8b5eff5a1120f4ba20afc88c4db6cf, type: 2}
+  m_Controller: {fileID: 9100000, guid: 063544d9180ba394b9e7c497c8372a7d, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -7395,7 +7508,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3324126895382223857}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69444b0f0f213194a80b35945c0b596e, type: 3}
+  m_Script: {fileID: 11500000, guid: acf56c874624b154cb54778b8d54dc0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   targetLength: 0
@@ -7409,7 +7522,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3324126895382223857}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90dbb08833ec2954e89fef58d7c3f775, type: 3}
+  m_Script: {fileID: 11500000, guid: fdde6f7ca811f334f970d0ef79f5046b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   groundMask:
